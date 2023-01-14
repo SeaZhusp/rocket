@@ -1,28 +1,15 @@
-import json
+import math
 
-from app.libs.http_client import HttpClient
-from app.core.TokenAuth import UserToken
+a = [10, 10.001, 10.49999, 10.5, 10.5001, 10.777777, 10.9999]
+result1 = []
+result2 = []
+result3 = []
 
+for i in a:
+    result1.append(int(i))  # int 去尾法 及舍掉小数位
+    result2.append(round(i))  # round 四舍五入
+    result3.append(math.ceil(i))  # math.ceil 进一法 加一取整
 
-def run_single():
-    url = 'http://www.baidu.com'
-    kwargs = {
-        # "data": {"categoryId": "1514619214747518978"},
-        "headers": {
-            "content-type": "application/json;charset=UTF-8",
-            "source": "501",
-            "token": "eyJhbGciOiJIUzUxMiJ9.eyJvcmdJZCI6ImEzMGY0OWVjLWU0YTktNGE2Zi1hNzIxLTUwNTI1MWYwNzJiOSIsInVzZXJJZCI6ImIxZjg3MjFiLTZlNjUtNDA5ZC05ODljLWZkZTNmYTJkMGRiZCIsImNsdXN0ZXJJZCI6ImFsaXByb2QiLCJleHAiOjE2NzQwNTc0NzJ9.wElm5F9oRgQRpCrTDAMUBPexCnWIvVhtLGFZPU_9CqaO5sJSnrA6CUDkLhmJnfvnfWq8h5E3XtBdVcu2PvzHrQ"
-        }
-    }
-    response = HttpClient(url, **kwargs).send_request('get')
-    return response
-
-
-def test_token():
-    token = UserToken.generate_token({"id": 1})
-    print(token)
-    data = UserToken.parse_token(token)
-    print(data)
-
-
-test_token()
+print("去尾法的结果是： ", result1)
+print("四舍五入的结果是： ", result2)
+print("进一法的结果是： ", result3)

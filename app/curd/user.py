@@ -1,42 +1,41 @@
-from datetime import datetime
-
 from sqlalchemy import or_
 
-from app.core.Exceptions import NormalException
-from app.models import Session
+from app.core.exc.exceptions import BusinessException
+from app.base.curd import BaseCrud
 from app.models.user import User
-from app.schema.user import UserRegisterForm, UserLoginForm
-from app.libs.logger import Log
+from app.schema.user.user_in import UserCreateBody, UserLoginBody
+from app.schema.user.user_out import UserDto
 
 
-class UserDao(object):
-    log = Log("UserDao")
+class UserDao(BaseCrud):
+    model = User
 
-    @staticmethod
-    async def register_user(user: UserRegisterForm):
-        with Session() as session:
-            users = session.query(User).filter(or_(User.username == user.username, User.email == user.email)).all()
-            if users:
-                raise NormalException(detail="用户名或邮箱已存在")
-            user = User(user)
-            session.add(user)
-            session.commit()
+    @classmethod
+    async def create(cls, body: UserCreateBody):
+        filter_list = [or_(cls.model.username == body.username,
+                           cls.model.email == body.email if body.email else None,
+                           cls.model.phone == body.phone if body.phone else None)]
+        ant = cls.get_with_existed(filter_list=filter_list)
+        if ant:
+            raise BusinessException("用户名/邮箱/手机已存在")
+        user = User(body)
+        return cls.insert_by_model(model_obj=user)
 
-    @staticmethod
-    async def login(form: UserLoginForm):
-        with Session() as session:
-            # 查询用户名/密码匹配且没有被删除的用户
-            user = session.query(User).filter(User.username == form.username, User.password == form.password,
-                                              User.deleted == 0).first()
-            if user is None:
-                raise Exception("用户名或密码错误")
-            # 更新用户的最后登录时间
-            user.last_login_time = datetime.now()
-            session.commit()
-            return user
+    @classmethod
+    async def login(cls, body: UserLoginBody):
+        user = cls.get_with_first(username=body.username, password=body.password)
+        if user is None:
+            raise BusinessException("用户名或密码错误")
+        if user.status == 0:
+            raise BusinessException("账号已被禁用,请联系管理员")
+        return user
 
-    @staticmethod
-    async def get_user_by_id(user_id: int):
-        with Session() as session:
-            user = session.query(User).get(user_id)
-            return user
+    @classmethod
+    async def get_user_by_id(cls, user_id: int):
+        user = cls.get_with_id(id=user_id)
+        return user
+
+    @classmethod
+    def search_user(cls, page: int = 1, size: int = 10, q: str = None) -> (int, User):
+        total, users = cls.get_with_pagination(page=page, size=size, _fields=UserDto, fullname=f"%{q}%" if q else None)
+        return total, users

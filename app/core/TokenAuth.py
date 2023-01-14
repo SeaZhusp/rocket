@@ -10,12 +10,12 @@ from config import Config
 class UserToken(object):
 
     @staticmethod
-    def generate_token(data):
-        new_data = dict({"exp": datetime.utcnow() + timedelta(hours=Config.TOKEN_EXPIRATION)}, **data)
-        return jwt.encode(new_data, key=Config.TOKEN_KEY)
+    def generate_token(data: dict) -> str:
+        token_data = dict({"exp": datetime.utcnow() + timedelta(hours=Config.TOKEN_EXPIRATION)}, **data)
+        return jwt.encode(token_data, key=Config.TOKEN_KEY)
 
     @staticmethod
-    def parse_token(token):
+    def parse_token(token: str) -> dict:
         try:
             return jwt.decode(token, key=Config.TOKEN_KEY, algorithms=['HS256'])
         except ExpiredSignatureError:

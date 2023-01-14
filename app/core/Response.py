@@ -19,15 +19,20 @@ class ResponseDto(GenericModel, Generic[DataT]):
 
 
 class ListDto(GenericModel, Generic[DataT]):
-    total: int = 0
     lists: DataT
 
 
 class ListResponseDto(ResponseDto, Generic[DataT]):
-    data: ListDto[DataT] = None
+    paging: dict = Field(...)
+    data: DataT = None
 
 
 class BaseDto(BaseModel):
+    id: int
+    create_time: datetime
+    update_time: datetime
+    deleted: int
+
     # 返参基础模型
     class Config:
         orm_mode = True

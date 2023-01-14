@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.libs.http_client import HttpClient
+from ext.apirunner.http_client import HttpClient
 
 router = APIRouter(prefix='/case')
 

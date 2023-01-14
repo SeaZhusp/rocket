@@ -1,11 +1,13 @@
 from fastapi import Header
 from starlette import status
 
-from app.core.Exceptions import AuthException, PermissionException
-from app.core.response import Response
+from app.core.exc.exceptions import AuthException, PermissionException
+from app.core.Response import Response
 from app.curd.user import UserDao
 from app.core.TokenAuth import UserToken
 from app.core.Enums import DataPermissionEnum
+from app.routers import user
+from collections import namedtuple
 
 FORBIDDEN = '对不起，你没有足够的权限'
 
@@ -31,3 +33,13 @@ class Permission:
         except Exception as e:
             raise AuthException(status.HTTP_200_OK, detail='token认证失败,请重新登录')
         return user_info
+
+
+Router = namedtuple('router', ['module', 'prefix', 'tags'])
+
+router_list = [
+    Router(module=user.router, prefix='/user', tags=["用户模块"]),
+    # Router(module=project.router, prefix='/api/project', tags=["项目管理模块"]),
+    # Router(module=cases.router, prefix='/api/cases', tags=["用例模块"]),
+    # Router(module=data.router, prefix='/api/data', tags=["数据统计"])
+]

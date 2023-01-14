@@ -1,28 +1,38 @@
+import json
+
 from fastapi import APIRouter, Depends
 
 from app.curd.user import UserDao
 from app.core.TokenAuth import UserToken
-from app.routers import Permission
-from app.schema.user import UserRegisterForm, UserLoginForm
-from app.core.response import Response
+from app.utils.utils import Utils
+from app.schema.user.user_in import UserCreateBody, UserLoginBody
+from app.core.Response import Response, ListResponseDto
+from app.schema.user.user_out import UserDto
 
 router = APIRouter(prefix="/user")
 
 
 @router.post("/create")
-async def create(user: UserRegisterForm):
-    await UserDao.register_user(user)
+async def create(user: UserCreateBody):
+    await UserDao.create(user)
     return Response.success(msg='注册成功')
 
 
 @router.post("/login")
-async def login(login_user: UserLoginForm):
+async def login(login_user: UserLoginBody):
     user = await UserDao.login(login_user)
-    user_info = Response.model_to_dict(user, "password")
-    token = UserToken.generate_token(user_info)
-    return Response.success(data=dict(userInfo=user_info, token=token), msg="登录成功")
+    # 将类加载数据到模型中
+    user_dto = UserDto.from_orm(user)
+    # xx.dict()和 dict()返回模型的字段和值的字典
+    # 返回表示 dict() 的 JSON 字符串，只有当转换为json，模型里面的编码规则(json_encoders)才生效
+    user_json: str = user_dto.json()
+    token = UserToken.generate_token(json.loads(user_json))
+    return Response.success(data=dict(userInfo=user, token=token), msg="登录成功")
 
 
 @router.get('/list')
-async def list_user(offset: int = 1, limit: int = 10, user=Depends(Permission())):
-    return dict(offset=offset, limit=limit)
+async def list_user(page: int = 1, size: int = 10, q: str = None):
+    total, users = UserDao.search_user(page=page, size=size, q=q)
+    total_page = Utils.get_total_page(total, size)
+    paging = dict(page=page, size=size, total=total, total_page=total_page)
+    return ListResponseDto(paging=paging, data=users)

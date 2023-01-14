@@ -7,9 +7,9 @@ class DataPermissionEnum(IntEnum):
     admin = 2  # 管理员
 
 
-class DeleteEnum(IntEnum):
-    no = 0
-    yes = 1
+class StatusEnum(IntEnum):
+    disable = 0  # 禁用
+    enable = 1  # 启用
 
 
 class CodeEnum(Enum):
