@@ -1,15 +1,10 @@
 import json
 
 from fastapi import FastAPI, Request, Depends
-# from fastapi.encoders import jsonable_encoder
-# from fastapi.exc import RequestValidationError
-# from fastapi import status
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
-# from starlette.responses import JSONResponse
-# from starlette.exc import HTTPException as StarletteHTTPException
 
-from app.core.auth import request_context
+from app.core.Auth import request_context
 from app.routers import router_list
 from app.core.exc.exceptions import BusinessException
 from app.core.Response import ResponseDto

@@ -2,7 +2,7 @@ from sqlalchemy import or_
 
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCrud
-from app.models.user import User
+from app.models.system.user import User
 from app.schema.user.user_in import UserCreateBody, UserLoginBody
 from app.schema.user.user_out import UserDto
 
@@ -36,6 +36,7 @@ class UserDao(BaseCrud):
         return user
 
     @classmethod
-    def search_user(cls, page: int = 1, size: int = 10, q: str = None) -> (int, User):
-        total, users = cls.get_with_pagination(page=page, size=size, _fields=UserDto, fullname=f"%{q}%" if q else None)
+    def query_with_fullname(cls, page: int = 1, limit: int = 10, search: str = None) -> (int, User):
+        total, users = cls.get_with_pagination(page=page, limit=limit, _fields=UserDto, _sort=['create_time'],
+                                               fullname=f"%{search}%" if search else None)
         return total, users

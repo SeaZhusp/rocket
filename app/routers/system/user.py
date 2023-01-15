@@ -2,7 +2,8 @@ import json
 
 from fastapi import APIRouter, Depends
 
-from app.curd.user import UserDao
+from app.core.Auth import Permission
+from app.curd.system.user import UserDao
 from app.core.TokenAuth import UserToken
 from app.utils.utils import Utils
 from app.schema.user.user_in import UserCreateBody, UserLoginBody
@@ -31,8 +32,8 @@ async def login(login_user: UserLoginBody):
 
 
 @router.get('/list')
-async def list_user(page: int = 1, size: int = 10, q: str = None):
-    total, users = UserDao.search_user(page=page, size=size, q=q)
-    total_page = Utils.get_total_page(total, size)
-    paging = dict(page=page, size=size, total=total, total_page=total_page)
+async def list_user(page: int = 1, limit: int = 10, search: str = None, user_info=Depends(Permission())):
+    total, users = UserDao.query_with_fullname(page=page, limit=limit, search=search)
+    total_page = Utils.get_total_page(total, limit)
+    paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=users)

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, INT, String, DATETIME
 
 from app.base.model import RocketBaseModel
-from app.core.Enums import DataPermissionEnum, StatusEnum
+from app.core.Enums import StatusEnum, DutyEnum
 
 
 class User(RocketBaseModel):
@@ -12,7 +12,7 @@ class User(RocketBaseModel):
     password = Column(String(32), unique=False, comment="密码")
     email = Column(String(64), unique=True, comment="邮箱")
     phone = Column(String(16), unique=True, comment="手机号")
-    data_permission = Column(INT, default=DataPermissionEnum.member.value, comment="0: 普通用户 1: 组长 2: 超级管理员")
+    duty = Column(INT, default=DutyEnum.member.value, comment="0: 普通用户 1: 组长 2: 超级管理员")
     status = Column(INT, default=StatusEnum.enable.value, comment="0:启用 1:禁用")
 
     def __init__(self, form):

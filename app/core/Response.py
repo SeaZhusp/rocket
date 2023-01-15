@@ -24,7 +24,6 @@ class ListDto(GenericModel, Generic[DataT]):
 
 class ListResponseDto(ResponseDto, Generic[DataT]):
     paging: dict = Field(...)
-    data: DataT = None
 
 
 class BaseDto(BaseModel):

@@ -1,4 +1,5 @@
 from loguru import logger
+from sqlalchemy import desc, asc
 
 from app.base.model import RocketBaseModel
 from typing import Type
@@ -68,12 +69,13 @@ class BaseCrud(object):
         return filter_list
 
     @classmethod
-    def query_wrapper(cls, session: Session, filter_list: list = None,
+    def query_wrapper(cls, session: Session, filter_list: list = None, _sort_type: bool = 'desc',
                       _sort: list = None, _fields: Type[BaseDto] = None, _group: list = None, **kwargs):
         """
         查询数据
         :param session: 会话
         :param filter_list: 过滤条件，比较特殊的，or_(xxx == xxx)
+        :param _sort_type: 排序方式，默认True，倒叙
         :param _sort: 排序字段，[xxx.xxx]
         :param kwargs: 不定传参，xx = xx
         :param _fields: Dto 过滤查询
@@ -90,23 +92,30 @@ class BaseCrud(object):
             query_obj = session.query(cls.model).filter(*_filter_list)
         if _group:
             query_obj = query_obj.group_by(*_group)
-        # 有排序字段时，进行排序
-        return query_obj.order_by(*_sort) if _sort else query_obj
+        if _sort:  # 有排序字段时，进行排序
+            _sorts = []
+            for d in _sort:
+                if _sort_type == 'asc':
+                    _sorts.append(asc(getattr(cls.model, d)))
+                else:
+                    _sorts.append(desc(getattr(cls.model, d)))
+            return query_obj.order_by(*_sorts) if _sort else query_obj
+        return query_obj
 
     @classmethod
     @connect
-    def get_with_pagination(cls, session: Session, page: int = 1, size: int = 10, **kwargs):
+    def get_with_pagination(cls, session: Session, page: int = 1, limit: int = 10, **kwargs):
         """
         分页查询
         :param session: 会话
         :param page: 页码
-        :param size: 大小
+        :param limit: 大小
         :param kwargs: 不定传参
         :return: 总数，查询对象
         """
         query_obj = cls.query_wrapper(session, **kwargs)
         total = query_obj.count()
-        return total, query_obj.limit(size).offset((page - 1) * size).all()
+        return total, query_obj.limit(limit).offset((page - 1) * limit).all()
 
     @classmethod
     @connect

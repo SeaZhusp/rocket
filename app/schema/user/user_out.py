@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from app.core.Response import BaseDto
 
 
@@ -8,5 +6,5 @@ class UserDto(BaseDto):
     fullname: str
     email: str
     phone: str
-    data_permission: int
+    duty: int
     status: int

@@ -1,7 +1,7 @@
 from enum import IntEnum, Enum
 
 
-class DataPermissionEnum(IntEnum):
+class DutyEnum(IntEnum):
     member = 0  # 成员
     leader = 1  # 组长
     admin = 2  # 管理员
@@ -19,8 +19,8 @@ class CodeEnum(Enum):
     PARAMS_ERROR = (101, '请求参数错误')
     JSON_ERROR = (102, 'json解析失败')
     BUSINESS_ERROR = (110, '系统处理异常, 请重试')
-    AUTH_ERROR = (401, '权限认证失败')
-    ROLE_ERROR = (403, '权限不足, 请联系管理员')
+    AUTH_ERROR = (401, 'Token认证失败')
+    PERMISSION_ERROR = (403, '权限不足, 请联系管理员')
     SYSTEM_ERROR = (500, '系统内部错误, 请重试')
 
     @property

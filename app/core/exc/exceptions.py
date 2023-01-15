@@ -21,5 +21,5 @@ class PermissionException(BusinessException):
     """用户权限不足异常类"""
 
     def __init__(self) -> None:
-        self.code = CodeEnum.ROLE_ERROR.code
-        self.msg = CodeEnum.ROLE_ERROR.msg
+        self.code = CodeEnum.PERMISSION_ERROR.code
+        self.msg = CodeEnum.PERMISSION_ERROR.msg

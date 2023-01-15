@@ -58,13 +58,18 @@ async def auth_exception_handler(request: Request, exc: AuthException):
     return JSONResponse(content=res.dict())
 
 
+async def res_validation_exception_handler(request: Request, exc: ValidationError):
+    res = ResponseDto(code=CodeEnum.PARAMS_ERROR.code, msg=CodeEnum.PARAMS_ERROR.msg)
+    return JSONResponse(content=res.dict())
+
+
 async def global_exception_handler(request: Request, exc: Exception):
     if isinstance(exc, PermissionException):
         return await permission_exception_handler(request, exc)
     elif isinstance(exc, AuthException):
         return await auth_exception_handler(request, exc)
-    # elif isinstance(exc, ValidationError):
-    #     return await res_validation_exception_handler(request, exc)
+    elif isinstance(exc, ValidationError):
+        return await res_validation_exception_handler(request, exc)
     else:
         import traceback
         logger.exception(traceback.format_exc())
