@@ -12,6 +12,11 @@ class StatusEnum(IntEnum):
     enable = 1  # 启用
 
 
+class DeleteEnum(IntEnum):
+    yes = 1  # 删除
+    no = 0  # 没删除
+
+
 class CodeEnum(Enum):
     """编码枚举类"""
     OK = (200, '请求成功')

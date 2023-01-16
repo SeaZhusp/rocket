@@ -22,9 +22,9 @@ class Permission:
             raise AuthException()
         try:
             user_info = UserToken.parse_token(token)
-            if user_info.get("data_permission", 0) < self.duty:
+            if user_info.get("duty", 0) < self.duty:
                 raise PermissionException()
-            user = await UserDao.get_user_by_id(user_info['id'])
+            user = await UserDao.get_by_id(user_info['id'])
             if user is None:
                 raise Exception("用户不存在")
             user_info = Response.model_to_dict(user, "password")

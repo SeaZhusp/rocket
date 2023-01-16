@@ -4,6 +4,7 @@ from sqlalchemy import desc, asc
 from app.base.model import RocketBaseModel
 from typing import Type
 
+from app.core.Enums import DeleteEnum
 from app.core.Response import BaseDto
 from app.core.exc.exceptions import BusinessException
 # from app.commons.requests.request_model import BaseBody
@@ -52,7 +53,7 @@ class BaseCrud(object):
         # 判断表是否有del_flag字段
         if getattr(cls.model, 'deleted', None) and not delete_flg:
             # 只取未删除的数据
-            filter_list.append(getattr(cls.model, 'deleted') == 0)
+            filter_list.append(getattr(cls.model, 'deleted') == DeleteEnum.no.value)
         for k, v in kwargs.items():
             # 过滤None的字段值，注意 0 和 False
             if v is None:
@@ -69,8 +70,8 @@ class BaseCrud(object):
         return filter_list
 
     @classmethod
-    def query_wrapper(cls, session: Session, filter_list: list = None, _sort_type: bool = 'desc',
-                      _sort: list = None, _fields: Type[BaseDto] = None, _group: list = None, **kwargs):
+    def query_wrapper(cls, session: Session, filter_list: list = None, _sort: list = None,
+                      _fields: Type[BaseDto] = None, _group: list = None, _sort_type: bool = 'desc', **kwargs):
         """
         查询数据
         :param session: 会话
@@ -245,30 +246,25 @@ class BaseCrud(object):
         session.add(model_obj)
         session.commit()
         return model_obj
-    #
-    # @classmethod
-    # @connect
-    # def delete_by_id(cls, session: Session, id: int, user: dict = None, **kwargs):
-    #     """
-    #     通过主键id删除数据
-    #     :param session: 会话
-    #     :param id: 主键id
-    #     :param user: 操作人
-    #     :return:
-    #     """
-    #     query = cls.query_wrapper(session, id=id, **kwargs)
-    #     query_obj = query.first()
-    #     if query_obj is None:
-    #         raise BusinessException("数据不存在")
-    #     setattr(query_obj, 'del_flag', DeleteEnum.yes.value)
-    #     setattr(query_obj, 'update_time', datetime.now())
-    #     if user:
-    #         setattr(query_obj, 'update_id', user['id'])
-    #         setattr(query_obj, 'update_name', user['username'])
-    #     session.commit()
-    #     session.refresh(query_obj)
-    #     return query_obj
-    #
+
+    @classmethod
+    @connect
+    def delete_with_id(cls, session: Session, pk: int, **kwargs):
+        """
+        通过主键id删除数据
+        :param session: 会话
+        :param pk: 主键id
+        :return:
+        """
+        query = cls.query_wrapper(session, id=pk, **kwargs)
+        query_obj = query.first()
+        if query_obj is None:
+            raise BusinessException("数据不存在")
+        setattr(query_obj, 'deleted', DeleteEnum.yes.value)
+        session.commit()
+        session.refresh(query_obj)
+        return query_obj
+
     # @classmethod
     # @connect
     # def get_with_count(cls, session: Session, **kwargs):

@@ -46,3 +46,7 @@ class UserUpdateBody(BaseBody):
     email: str = Field(None, title="邮箱", description="非必传")
     duty: DutyEnum = Field(0, title="数据权限", description="非必传")
     status: StatusEnum = Field(0, title="是否冻结", description="非必传")
+
+
+class UserDeleteBody(BaseBody):
+    id: int

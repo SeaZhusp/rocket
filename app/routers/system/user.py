@@ -3,20 +3,21 @@ import json
 from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
+from app.core.Enums import DutyEnum
 from app.curd.system.user import UserDao
 from app.core.TokenAuth import UserToken
 from app.utils.utils import Utils
 from app.schema.user.user_in import UserCreateBody, UserLoginBody
-from app.core.Response import Response, ListResponseDto
+from app.core.Response import ListResponseDto, ResponseDto
 from app.schema.user.user_out import UserDto
 
 router = APIRouter(prefix="/user")
 
 
 @router.post("/create")
-async def create(user: UserCreateBody):
+async def create(user: UserCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await UserDao.create(user)
-    return Response.success(msg='注册成功')
+    return ResponseDto(msg='注册成功')
 
 
 @router.post("/login")
@@ -28,12 +29,18 @@ async def login(login_user: UserLoginBody):
     # 返回表示 dict() 的 JSON 字符串，只有当转换为json，模型里面的编码规则(json_encoders)才生效
     user_json: str = user_dto.json()
     token = UserToken.generate_token(json.loads(user_json))
-    return Response.success(data=dict(userInfo=user, token=token), msg="登录成功")
+    return ResponseDto(data=dict(userInfo=user, token=token), msg="登录成功")
 
 
 @router.get('/list')
 async def list_user(page: int = 1, limit: int = 10, search: str = None, user_info=Depends(Permission())):
-    total, users = UserDao.query_with_fullname(page=page, limit=limit, search=search)
+    total, users = await UserDao.query_with_fullname(page=page, limit=limit, search=search)
     total_page = Utils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=users)
+
+
+@router.delete('/delete/{id}')
+async def delete_user(id: int, user_info=Depends(Permission(DutyEnum.admin))):
+    await UserDao.delete_by_id(user_id=id)
+    return ResponseDto(msg="删除成功")

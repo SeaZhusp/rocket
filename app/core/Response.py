@@ -79,10 +79,10 @@ class Response(object):
     def base_response(code, msg, data=None):
         return dict(code=code, msg=msg, data=data)
 
-    @staticmethod
-    def success(msg="操作成功", data=None):
-        return Response.base_response(200, msg=msg, data=data)
+    # @staticmethod
+    # def success(msg="操作成功", data=None):
+    #     return Response.base_response(200, msg=msg, data=data)
 
-    @staticmethod
-    def failed(msg="操作失败", data=None):
-        return Response.base_response(code=-1, msg=msg, data=data)
+    # @staticmethod
+    # def failed(msg="操作失败", data=None):
+    #     return Response.base_response(code=-1, msg=msg, data=data)
