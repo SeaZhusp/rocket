@@ -2,7 +2,7 @@ from starlette.requests import Request
 
 from app.core.context import REQUEST_CONTEXT
 
-from fastapi import Header
+from fastapi import Header, Request
 
 from app.core.exc.exceptions import AuthException, PermissionException
 from app.core.Response import Response
@@ -16,8 +16,8 @@ class Permission:
     def __init__(self, duty: int = DutyEnum.member.value):
         self.duty = duty
 
-    async def __call__(self, token: str = Header(None)):
-        print("权限认证开始")
+    async def __call__(self, request: Request, token: str = Header(None)):
+        # print(await request.body())
         if not token:
             raise AuthException()
         try:
