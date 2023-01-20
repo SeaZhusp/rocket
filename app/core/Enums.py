@@ -17,6 +17,10 @@ class DeleteEnum(IntEnum):
     no = 0  # 没删除
 
 
+class ProjectTypeEnum(IntEnum):
+    api = 0  # 接口
+
+
 class CodeEnum(Enum):
     """编码枚举类"""
     OK = (200, '请求成功')

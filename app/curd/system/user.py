@@ -3,8 +3,8 @@ from sqlalchemy import or_
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCrud
 from app.models.system.user import User
-from app.schema.user.user_in import UserCreateBody, UserLoginBody
-from app.schema.user.user_out import UserDto
+from app.schema.system.user.user_in import UserCreateBody, UserLoginBody
+from app.schema.system.user.user_out import UserDto
 
 
 class UserDao(BaseCrud):

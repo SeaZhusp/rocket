@@ -7,9 +7,9 @@ from app.core.Enums import DutyEnum
 from app.curd.system.user import UserDao
 from app.core.TokenAuth import UserToken
 from app.utils.utils import Utils
-from app.schema.user.user_in import UserCreateBody, UserLoginBody
+from app.schema.system.user.user_in import UserCreateBody, UserLoginBody
 from app.core.Response import ListResponseDto, ResponseDto
-from app.schema.user.user_out import UserDto
+from app.schema.system.user.user_out import UserDto
 
 router = APIRouter(prefix="/user")
 
