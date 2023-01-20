@@ -2,11 +2,11 @@ from typing import Union
 
 from pydantic import validator, Field
 
-from app.base.schema import BaseBody
+from app.base.schema import RocketBaseBody
 from app.utils.utils import StringUtils
 
 
-class ProjectCreateBody(BaseBody):
+class ProjectCreateBody(RocketBaseBody):
     name: str = Field(..., title="项目名", description="必传")
     type: int = Field(..., title="项目类型", description="必传")
     description: Union[str, None]
