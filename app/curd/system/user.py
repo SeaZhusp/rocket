@@ -18,8 +18,8 @@ class UserDao(BaseCrud):
         ant = cls.get_with_existed(filter_list=filter_list)
         if ant:
             raise BusinessException("用户名/邮箱/手机已存在")
-        user = User(body)
-        return cls.insert_by_model(model_obj=user)
+        user = User(**body.dict())
+        return cls.insert_with_model(model_obj=user)
 
     @classmethod
     async def login(cls, body: UserLoginBody):
@@ -44,4 +44,9 @@ class UserDao(BaseCrud):
     @classmethod
     async def delete_by_id(cls, user_id: int):
         user = cls.delete_with_id(pk=user_id)
+        return user
+
+    @classmethod
+    async def update_user(cls, user: UserUpdateBody):
+        user = cls.update_with_id(model=user)
         return user

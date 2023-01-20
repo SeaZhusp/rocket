@@ -1,4 +1,4 @@
-from sqlalchemy import Column, INT, String, DATETIME
+from sqlalchemy import Column, INT, String
 
 from app.base.model import RocketBaseModel
 from app.core.Enums import StatusEnum, DutyEnum
@@ -12,12 +12,13 @@ class User(RocketBaseModel):
     password = Column(String(32), unique=False, comment="密码")
     email = Column(String(64), unique=True, comment="邮箱")
     phone = Column(String(16), unique=True, comment="手机号")
-    duty = Column(INT, default=DutyEnum.member.value, comment="0: 普通用户 1: 组长 2: 超级管理员")
+    duty = Column(INT, default=DutyEnum.member.value, comment="0: 普通用户 1: 组长 2: 管理员")
     status = Column(INT, default=StatusEnum.enable.value, comment="0:启用 1:禁用")
 
-    def __init__(self, form):
-        self.username = form.username
-        self.password = form.password
-        self.email = form.email
-        self.phone = form.phone
-        self.fullname = form.fullname
+    def __init__(self, username, fullname, password, email='', phone=''):
+        super().__init__()
+        self.username = username
+        self.password = password
+        self.email = email
+        self.phone = phone
+        self.fullname = fullname

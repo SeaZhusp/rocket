@@ -1,9 +1,12 @@
+from enum import Enum
+
 from loguru import logger
 from sqlalchemy import desc, asc
 
 from app.base.model import RocketBaseModel
-from typing import Type
+from typing import Type, Union
 
+from app.base.schema import RocketBaseBody
 from app.core.Enums import DeleteEnum
 from app.core.Response import BaseDto
 from app.core.exc.exceptions import BusinessException
@@ -175,69 +178,73 @@ class BaseCrud(object):
         sql_obj = cls.query_wrapper(session, id=id)
         return sql_obj.first()
 
-    #
-    # @classmethod
-    # @connect
-    # def update_by_id(cls, session: Session, model: Union[dict, BaseBody], user: dict = None, not_null=False, **kwargs):
-    #     """
-    #     通过主键id更新数据
-    #     :param session: 会话
-    #     :param model: 更新模型
-    #     :param user: 更新用户数据
-    #     :param not_null: not_null=True 只有非空字段才更新数据
-    #     :return:
-    #     """
-    #     if isinstance(model, dict):
-    #         id = model['id']
-    #         model_dict = model
-    #     else:
-    #         id = model.id
-    #         model_dict = vars(model)
-    #     query = cls.query_wrapper(session, id=id, **kwargs)
-    #     query_obj = query.first()
-    #     if query_obj is None:
-    #         raise BusinessException("数据不存在")
-    #     for var, value in model_dict.items():
-    #         # 如果value是枚举值，得通过xxx.value获取值
-    #         if isinstance(value, Enum): value = value.value
-    #         if not_null:
-    #             # 过滤None的字段值，注意 0 和 False
-    #             if value is None:
-    #                 continue
-    #             if isinstance(value, (bool, int)) or value:
-    #                 setattr(query_obj, var, value)
-    #         else:
-    #             setattr(query_obj, var, value)
-    #         if user:
-    #             setattr(query_obj, 'update_id', user['id'])
-    #             setattr(query_obj, 'update_name', user['username'])
-    #     session.commit()
-    #     session.refresh(query_obj)
-    #     return query_obj
-    #
-    # @classmethod
-    # @connect
-    # def update_by_map(cls, session: Session, filter_list: list, user: dict = None, **kwargs):
-    #     """
-    #     批量更新数据
-    #     :param session: 会话
-    #     :param filter_list: 过滤条件
-    #     :param user: 更新人
-    #     :param kwargs: 要更新的数据，k = v
-    #     :return:
-    #     """
-    #     # https://docs.sqlalchemy.org/en/14/errors.html#error-bhk3
-    #     if getattr(cls.model, 'update_id') and getattr(cls.model, 'update_name') and user:
-    #         kwargs['update_id'] = user['id']
-    #         kwargs['update_name'] = user['username']
-    #     query_obj = session.query(cls.model).filter(*filter_list)
-    #     query_obj.update(kwargs)
-    #     session.commit()
-    #     return query_obj.all()
+    @classmethod
+    @connect
+    def update_with_id(cls, session: Session, model: Union[dict, RocketBaseBody], user: dict = None, not_null=False,
+                       **kwargs):
+        """
+        通过主键id更新数据
+        :param session: 会话
+        :param model: 更新模型
+        :param user: 更新用户数据
+        :param not_null: not_null=True 只有非空字段才更新数据
+        :return:
+        """
+        if isinstance(model, dict):
+            id = model['id']
+            model_dict = model
+        else:
+            id = model.id
+            model_dict = vars(model)
+        query = cls.query_wrapper(session, id=id, **kwargs)
+        query_obj = query.first()
+        if query_obj is None:
+            raise BusinessException("数据不存在")
+        for var, value in model_dict.items():
+            # 如果value是枚举值，得通过xxx.value获取值
+            if isinstance(value, Enum):
+                value = value.value
+            if not_null:
+                # 过滤None的字段值，注意 0 和 False
+                if value is None:
+                    continue
+                if isinstance(value, (bool, int)) or value:
+                    setattr(query_obj, var, value)
+            else:
+                setattr(query_obj, var, value)
+            if user:
+                # todo: 更新人id和name
+                pass
+                # setattr(query_obj, 'update_id', user['id'])
+                # setattr(query_obj, 'update_name', user['username'])
+        session.commit()
+        # session.refresh(query_obj)
+        return query_obj
+
+    @classmethod
+    @connect
+    def update_by_map(cls, session: Session, filter_list: list, user: dict = None, **kwargs):
+        """
+        批量更新数据
+        :param session: 会话
+        :param filter_list: 过滤条件
+        :param user: 更新人
+        :param kwargs: 要更新的数据，k = v
+        :return:
+        """
+        # https://docs.sqlalchemy.org/en/14/errors.html#error-bhk3
+        if getattr(cls.model, 'update_id') and getattr(cls.model, 'update_name') and user:
+            kwargs['update_id'] = user['id']
+            kwargs['update_name'] = user['username']
+        query_obj = session.query(cls.model).filter(*filter_list)
+        query_obj.update(kwargs)
+        session.commit()
+        return query_obj.all()
+
     #
     @classmethod
     @connect
-    def insert_by_model(cls, session: Session, model_obj: RocketBaseModel):
+    def insert_with_model(cls, session: Session, model_obj: RocketBaseModel):
         """
         :param session: 会话
         :param model_obj: 实例化的表

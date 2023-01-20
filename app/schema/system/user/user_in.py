@@ -2,7 +2,7 @@ from typing import Union
 
 from pydantic import validator, Field
 
-from app.base.schema import BaseBody
+from app.base.schema import RocketBaseBody
 from app.core.Enums import DutyEnum, StatusEnum
 from app.utils.encrypt import Encrypt
 
@@ -10,7 +10,7 @@ from app.utils.utils import StringUtils
 from config import Config
 
 
-class BaseUserBody(BaseBody):
+class BaseUserBody(RocketBaseBody):
     password: str
     username: str
 
@@ -40,13 +40,14 @@ class UserLoginBody(BaseUserBody):
         return Encrypt.md5(f"{v}{Config.TOKEN_KEY}")
 
 
-class UserUpdateBody(BaseBody):
+class UserUpdateBody(RocketBaseBody):
     id: int = Field(..., title="用户id", description="必传")
+    fullname: str = Field(None, title="姓名", description="非必传")
     phone: str = Field(None, title="手机号", description="非必传")
     email: str = Field(None, title="邮箱", description="非必传")
     duty: DutyEnum = Field(0, title="数据权限", description="非必传")
-    status: StatusEnum = Field(0, title="是否冻结", description="非必传")
+    status: StatusEnum = Field(1, title="是否冻结", description="非必传")
 
 
-class UserDeleteBody(BaseBody):
-    id: int
+class UserDeleteBody(RocketBaseBody):
+    ids: list

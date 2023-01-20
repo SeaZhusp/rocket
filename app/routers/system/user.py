@@ -7,7 +7,7 @@ from app.core.Enums import DutyEnum
 from app.curd.system.user import UserDao
 from app.core.TokenAuth import UserToken
 from app.utils.utils import Utils
-from app.schema.system.user.user_in import UserCreateBody, UserLoginBody
+from app.schema.system.user.user_in import UserCreateBody, UserLoginBody, UserUpdateBody
 from app.core.Response import ListResponseDto, ResponseDto
 from app.schema.system.user.user_out import UserDto
 
@@ -44,3 +44,9 @@ async def list_user(page: int = 1, limit: int = 10, search: str = None, user_inf
 async def delete_user(id: int, user_info=Depends(Permission(DutyEnum.admin))):
     await UserDao.delete_by_id(user_id=id)
     return ResponseDto(msg="删除成功")
+
+
+@router.put('/update')
+async def update_user(user: UserUpdateBody, user_info=Depends(Permission(DutyEnum.admin))):
+    await UserDao.update_user(user)
+    return ResponseDto(msg="更新成功")
