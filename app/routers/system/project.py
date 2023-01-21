@@ -19,14 +19,14 @@ async def create(project: ProjectCreateBody, user_info=Depends(Permission(DutyEn
 
 
 @router.get('/list')
-async def list_user(page: int = 1, limit: int = 10, search: str = None, user_info=Depends(Permission())):
-    total, users = await UserDao.query_with_fullname(page=page, limit=limit, search=search)
+async def list_project(page: int = 1, limit: int = 10, search: str = None, user_info=Depends(Permission())):
+    total, projects = await ProjectDao.query_with_name(page=page, limit=limit, search=search)
     total_page = Utils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
-    return ListResponseDto(paging=paging, data=users)
+    return ListResponseDto(paging=paging, data=projects)
 
 
 @router.delete('/delete/{id}')
 async def delete_user(id: int, user_info=Depends(Permission(DutyEnum.admin))):
-    await UserDao.delete_by_id(user_id=id)
+    # await ProjectDao.delete_by_id(user_id=id)
     return ResponseDto(msg="删除成功")

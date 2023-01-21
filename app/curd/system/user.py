@@ -1,13 +1,13 @@
 from sqlalchemy import or_
 
 from app.core.exc.exceptions import BusinessException
-from app.base.curd import BaseCrud
+from app.base.curd import BaseCurd
 from app.models.system.user import User
 from app.schema.system.user.user_in import UserCreateBody, UserLoginBody, UserUpdateBody
 from app.schema.system.user.user_out import UserDto
 
 
-class UserDao(BaseCrud):
+class UserDao(BaseCurd):
     model = User
 
     @classmethod

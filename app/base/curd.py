@@ -14,6 +14,7 @@ from app.core.exc.exceptions import BusinessException
 # from app.commons.responses.response_model import BaseDto
 from functools import wraps
 from app.models import Session
+from app.models.system.user import User
 
 
 def connect(func):
@@ -40,7 +41,7 @@ def connect(func):
 
 
 # 只支持单表
-class BaseCrud(object):
+class BaseCurd(object):
     model: Type[RocketBaseModel] = None
 
     @classmethod
@@ -271,6 +272,33 @@ class BaseCrud(object):
         session.commit()
         session.refresh(query_obj)
         return query_obj
+
+    @classmethod
+    @connect
+    def get_with_join(cls, session: Session, page: int = 1, limit: int = 10, filter_list: list = None,
+                      dto: BaseDto = None, query_fields: list = [], _group: list = None, _sort_type: bool = 'desc',
+                      _sort: list = None, join_con: list = [], **kwargs):
+        _filter_list = cls.__filter_k_v(filter_list, **kwargs)
+        field_list = []
+        if dto:
+            for field in dto.__fields__.keys():
+                field_list.append(getattr(cls.model, field))
+            # field_list += query_fields
+            query_obj = session.query(*field_list, *query_fields).filter(*_filter_list)
+        else:
+            query_obj = session.query(cls.model, *query_fields)
+        query_obj = query_obj.join(*join_con)
+        if _group:
+            query_obj = query_obj.group_by(*_group)
+        if _sort:  # 有排序字段时，进行排序
+            _sorts = []
+            for d in _sort:
+                if _sort_type == 'asc':
+                    _sorts.append(asc(getattr(cls.model, d)))
+                else:
+                    _sorts.append(desc(getattr(cls.model, d)))
+        total = query_obj.count()
+        return total, query_obj.limit(limit).offset((page - 1) * limit).all()
 
     # @classmethod
     # @connect

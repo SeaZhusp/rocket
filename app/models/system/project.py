@@ -10,3 +10,9 @@ class Project(RocketBaseModel):
     type = Column(INT, nullable=False, comment="0:api 1:web 2:app")
     owner = Column(INT, nullable=False, comment='项目所有者')
     description = Column(String(200), comment="描述")
+
+    def __init__(self, form):
+        self.name = form.name
+        self.type = form.type
+        self.owner = form.owner
+        self.description = form.description
