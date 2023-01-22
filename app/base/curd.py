@@ -6,9 +6,9 @@ from sqlalchemy import desc, asc
 from app.base.model import RocketBaseModel
 from typing import Type, Union
 
-from app.base.schema import RocketBaseBody
+from app.base.schema import RocketBaseSchema
 from app.core.Enums import DeleteEnum
-from app.core.Response import BaseDto
+from app.base.dto import RocketBaseDto
 from app.core.exc.exceptions import BusinessException
 # from app.commons.requests.request_model import BaseBody
 # from app.commons.responses.response_model import BaseDto
@@ -75,7 +75,7 @@ class BaseCurd(object):
 
     @classmethod
     def query_wrapper(cls, session: Session, filter_list: list = None, _sort: list = None,
-                      _fields: Type[BaseDto] = None, _group: list = None, _sort_type: bool = 'desc', **kwargs):
+                      _fields: Type[RocketBaseDto] = None, _group: list = None, _sort_type: bool = 'desc', **kwargs):
         """
         查询数据
         :param session: 会话
@@ -125,7 +125,7 @@ class BaseCurd(object):
     @classmethod
     @connect
     def get_with_params(cls, session: Session, filter_list: list = None,
-                        _sort: list = None, _fields: Type[BaseDto] = None, _group: list = None, **kwargs):
+                        _sort: list = None, _fields: Type[RocketBaseDto] = None, _group: list = None, **kwargs):
         """
         查询数据
         :param session: 会话
@@ -181,7 +181,7 @@ class BaseCurd(object):
 
     @classmethod
     @connect
-    def update_with_id(cls, session: Session, model: Union[dict, RocketBaseBody], user: dict = None, not_null=False,
+    def update_with_id(cls, session: Session, model: Union[dict, RocketBaseSchema], user: dict = None, not_null=False,
                        **kwargs):
         """
         通过主键id更新数据
@@ -257,14 +257,14 @@ class BaseCurd(object):
 
     @classmethod
     @connect
-    def delete_with_id(cls, session: Session, pk: int, **kwargs):
+    def delete_with_id(cls, session: Session, ident: int, **kwargs):
         """
         通过主键id删除数据
         :param session: 会话
-        :param pk: 主键id
+        :param ident: 主键id
         :return:
         """
-        query = cls.query_wrapper(session, id=pk, **kwargs)
+        query = cls.query_wrapper(session, id=ident, **kwargs)
         query_obj = query.first()
         if query_obj is None:
             raise BusinessException("数据不存在")
@@ -276,8 +276,8 @@ class BaseCurd(object):
     @classmethod
     @connect
     def get_with_join(cls, session: Session, page: int = 1, limit: int = 10, filter_list: list = None,
-                      dto: BaseDto = None, query_fields: list = [], _group: list = None, _sort_type: bool = 'desc',
-                      _sort: list = None, join_con: list = [], **kwargs):
+                      dto: RocketBaseDto = None, query_fields: list = [], _group: list = None,
+                      _sort_type: bool = 'desc', _sort: list = None, join_con: list = [], **kwargs):
         _filter_list = cls.__filter_k_v(filter_list, **kwargs)
         field_list = []
         if dto:
@@ -286,7 +286,7 @@ class BaseCurd(object):
             # field_list += query_fields
             query_obj = session.query(*field_list, *query_fields).filter(*_filter_list)
         else:
-            query_obj = session.query(cls.model, *query_fields)
+            query_obj = session.query(cls.model, *query_fields).filter(*_filter_list)
         query_obj = query_obj.join(*join_con)
         if _group:
             query_obj = query_obj.group_by(*_group)

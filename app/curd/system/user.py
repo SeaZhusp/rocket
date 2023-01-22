@@ -42,8 +42,8 @@ class UserDao(BaseCurd):
         return user
 
     @classmethod
-    async def delete_by_id(cls, user_id: int):
-        user = cls.delete_with_id(pk=user_id)
+    async def delete_by_id(cls, ident: int):
+        user = cls.delete_with_id(ident=ident)
         return user
 
     @classmethod

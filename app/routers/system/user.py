@@ -40,13 +40,13 @@ async def list_user(page: int = 1, limit: int = 10, search: str = None, user_inf
     return ListResponseDto(paging=paging, data=users)
 
 
-@router.delete('/delete/{id}')
-async def delete_user(id: int, user_info=Depends(Permission(DutyEnum.admin))):
-    await UserDao.delete_by_id(user_id=id)
+@router.delete('/delete/{ident}')
+async def delete(ident: int, user_info=Depends(Permission(DutyEnum.admin))):
+    await UserDao.delete_by_id(ident=ident)
     return ResponseDto(msg="删除成功")
 
 
 @router.put('/update')
-async def update_user(user: UserUpdateBody, user_info=Depends(Permission(DutyEnum.admin))):
+async def update(user: UserUpdateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await UserDao.update_user(user)
     return ResponseDto(msg="更新成功")

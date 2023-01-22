@@ -1,7 +1,7 @@
-from app.core.Response import BaseDto
+from app.base.dto import RocketBaseDto
 
 
-class UserDto(BaseDto):
+class UserDto(RocketBaseDto):
     username: str
     fullname: str
     email: str

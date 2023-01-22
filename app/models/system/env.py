@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, INT, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, String, INT
 
 from app.base.model import RocketBaseModel
 
@@ -22,8 +21,7 @@ class Domain(RocketBaseModel):
 
     domain = Column(String(256), nullable=False, comment='域名')
     description = Column(String(200), comment='描述')
-    env_id = Column(INT, ForeignKey('sys_env.id'))
-    env = relationship(Env, backref=backref('sys_env_domain', uselist=True))
+    env_id = Column(INT, nullable=False, comment='环境id')
 
     def __init__(self, form):
         self.domain = form.domain

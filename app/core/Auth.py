@@ -1,5 +1,3 @@
-from starlette.requests import Request
-
 from app.core.context import REQUEST_CONTEXT
 
 from fastapi import Header, Request
