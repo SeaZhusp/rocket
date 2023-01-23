@@ -12,8 +12,8 @@ class EnvDao(BaseCurd):
         ant = cls.get_with_existed(filter_list=filter_list)
         if ant:
             raise BusinessException("项目已存在")
-        env = Env(env)
-        return cls.insert_with_model(model_obj=env)
+        o = Env(env)
+        return cls.insert_with_model(model_obj=o)
 
     @classmethod
     async def create_env_domain(cls, domain):

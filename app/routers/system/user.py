@@ -17,7 +17,7 @@ router = APIRouter(prefix="/user")
 @router.post("/create")
 async def create(user: UserCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await UserDao.create(user)
-    return ResponseDto(msg='注册成功')
+    return ResponseDto(msg='创建成功')
 
 
 @router.post("/login")

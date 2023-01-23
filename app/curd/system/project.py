@@ -15,8 +15,8 @@ class ProjectDao(BaseCurd):
         ant = cls.get_with_existed(filter_list=filter_list)
         if ant:
             raise BusinessException("项目已存在")
-        project = Project(project)
-        return cls.insert_with_model(model_obj=project)
+        o = Project(project)
+        return cls.insert_with_model(model_obj=o)
 
     @classmethod
     async def query_with_name(cls, page: int = 1, limit: int = 10, search: str = None):
@@ -28,8 +28,7 @@ class ProjectDao(BaseCurd):
 
     @classmethod
     async def delete_by_id(cls, ident):
-        project = cls.delete_with_id(ident=ident)
-        return project
+        return cls.delete_with_id(ident=ident)
 
     @classmethod
     async def update_project(cls, project):
@@ -37,5 +36,5 @@ class ProjectDao(BaseCurd):
         ant = cls.get_with_existed(filter_list=filter_list)
         if ant:
             raise BusinessException("项目已存在")
-        project = cls.update_with_id(model=project)
-        return project
+        o = cls.update_with_id(model=project)
+        return o
