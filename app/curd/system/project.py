@@ -3,7 +3,6 @@ from sqlalchemy.sql.elements import and_
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCurd
 from app.models.system.project import Project
-from app.models.system.user import User
 
 
 class ProjectDao(BaseCurd):
@@ -38,3 +37,7 @@ class ProjectDao(BaseCurd):
             raise BusinessException("项目已存在")
         o = cls.update_with_id(model=project)
         return o
+
+    @classmethod
+    async def list_all_project(cls, project_type):
+        return cls.get_with_params(type=project_type, _sort=['create_time'])

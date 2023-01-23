@@ -35,3 +35,9 @@ async def delete_project(ident: int, user_info=Depends(Permission(DutyEnum.admin
 async def update(project: ProjectUpdateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await ProjectDao.update_project(project)
     return ResponseDto(msg="更新成功")
+
+
+@router.get('/listall')
+async def list_all_project(project_type: int):
+    projects = await ProjectDao.list_all_project(project_type)
+    return ResponseDto(data=projects)
