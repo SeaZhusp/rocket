@@ -35,9 +35,16 @@ class ProjectDao(BaseCurd):
         ant = cls.get_with_existed(filter_list=filter_list)
         if ant:
             raise BusinessException("项目已存在")
-        o = cls.update_with_id(model=project)
-        return o
+        return cls.update_with_id(model=project)
 
     @classmethod
     async def list_all_project(cls, project_type):
         return cls.get_with_params(type=project_type, _sort=['create_time'])
+
+
+class ProjectFacade(BaseCurd):
+    model = Project
+
+    @classmethod
+    async def exist_by_id(cls, ident):
+        return cls.get_with_existed(filter_list=[cls.model.id == ident])
