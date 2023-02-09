@@ -4,7 +4,7 @@ from pydantic import validator, Field
 
 from app.base.schema import RocketBaseSchema
 from app.core.Enums import DutyEnum, StatusEnum
-from app.utils.encrypt import Encrypt
+from app.utils.crypto import Crypto
 
 from app.utils.utils import StringUtils
 from config import Config
@@ -26,7 +26,7 @@ class UserCreateBody(BaseUserBody):
 
     @validator('password')
     def password_to_md5(cls, v):
-        return Encrypt.md5(f"{v}{Config.TOKEN_KEY}")
+        return Crypto.md5(f"{v}{Config.TOKEN_KEY}")
 
 
 class UserLoginBody(BaseUserBody):
@@ -37,7 +37,7 @@ class UserLoginBody(BaseUserBody):
 
     @validator('password')
     def password_to_md5(cls, v):
-        return Encrypt.md5(f"{v}{Config.TOKEN_KEY}")
+        return Crypto.md5(f"{v}{Config.TOKEN_KEY}")
 
 
 class UserUpdateBody(RocketBaseSchema):

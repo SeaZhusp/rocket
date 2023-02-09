@@ -1,4 +1,4 @@
-from app.routers.system import user, dictionary, env, project, catalog
+from app.routers.system import user, dictionary, env, project, catalog, file
 from collections import namedtuple
 
 Router = namedtuple('router', ['module', 'prefix', 'tags'])
@@ -9,4 +9,6 @@ router_list = [
     Router(module=project.router, prefix='/sys', tags=["项目管理"]),
     Router(module=env.router, prefix='/sys', tags=["环境管理"]),
     Router(module=catalog.router, prefix='/sys', tags=["目录管理"]),
+    Router(module=file.router, prefix='/sys', tags=['文件管理']),
+
 ]

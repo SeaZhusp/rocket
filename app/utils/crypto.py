@@ -1,7 +1,7 @@
 import hashlib
 
 
-class Encrypt(object):
+class Crypto(object):
 
     @staticmethod
     def md5(v):

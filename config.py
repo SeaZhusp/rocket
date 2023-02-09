@@ -2,7 +2,8 @@ import os
 
 
 class Config(object):
-    MYSQL_HOST = '172.17.122.101'
+    # MYSQL_HOST = '172.17.122.101'
+    MYSQL_HOST = '127.0.0.1'
     MYSQL_USER = 'root'
     MYSQL_PWD = '123456'
     MYSQL_PORT = 3306
@@ -32,6 +33,10 @@ class FilePath(object):
     LOG_FILE_PATH = os.path.join(ROOT_PATH, "logs")  # 日志文件路径
     if not os.path.isdir(LOG_FILE_PATH):
         os.mkdir(LOG_FILE_PATH)
+
+    FILE_PATH = os.path.join(ROOT_PATH, "files")  # 文件路径
+    if not os.path.isdir(FILE_PATH):
+        os.mkdir(FILE_PATH)
 
     ROCKET_SERVER = os.path.join(LOG_FILE_PATH, 'rocket_server.log')
 

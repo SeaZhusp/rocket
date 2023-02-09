@@ -38,6 +38,6 @@ async def update(project: ProjectUpdateBody, user_info=Depends(Permission(DutyEn
 
 
 @router.get('/listall')
-async def list_all_project(project_type: int):
+async def list_all_project(project_type: int, user_info=Depends(Permission())):
     projects = await ProjectDao.list_all_project(project_type)
     return ResponseDto(data=projects)
