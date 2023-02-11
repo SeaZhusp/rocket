@@ -13,3 +13,7 @@ for i in a:
 print("去尾法的结果是： ", result1)
 print("四舍五入的结果是： ", result2)
 print("进一法的结果是： ", result3)
+
+a = {"a": 1}
+a.update(b=1)
+print(a)

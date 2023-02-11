@@ -8,3 +8,4 @@ pymysql==1.0.2
 requests==2.28.1
 contextvars~=2.4
 loguru~=0.6.0
+python-multipart==0.0.5
