@@ -28,3 +28,11 @@ class ApiDao(BaseCurd):
         total, apis = cls.get_with_pagination(page=page, limit=limit, _fields=ApiDto, _sort=['create_time'],
                                               project_id=project_id, **kwargs)
         return total, apis
+
+    @classmethod
+    async def detail(cls, pk):
+        return cls.get_with_id(pk=pk)
+
+    @classmethod
+    async def delete(cls, pk: int):
+        cls.delete_with_id(pk=pk)

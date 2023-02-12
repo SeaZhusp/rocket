@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, Depends
 
 from app.core.Response import ResponseDto, ListResponseDto
@@ -23,3 +25,16 @@ async def list_api(project_id: int, catalog_id="", status="", level="", search="
     total_page = Utils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=apis)
+
+
+@router.get('/{pk}')
+async def get_api_detail(pk: int, user_info=Depends(Permission())):
+    api = await ApiDao.detail(pk=pk)
+    api.body = json.loads(api.body)
+    return ResponseDto(data=dict(api=api))
+
+
+@router.delete('/delete/{pk}')
+async def delete_api(pk: int, user_info=Depends(Permission())):
+    await ApiDao.delete(pk=pk)
+    return ResponseDto(msg='删除成功')

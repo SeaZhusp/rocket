@@ -9,7 +9,7 @@ router = APIRouter(prefix='/catalog')
 
 
 @router.post('/create')
-async def create(catalog: CatalogCreateBody, user_info=Depends(Permission())):
+async def create_catalog(catalog: CatalogCreateBody, user_info=Depends(Permission())):
     await CatalogDao.create(catalog)
     return ResponseDto(msg="创建成功")
 
@@ -26,13 +26,13 @@ async def get_catalog_tree(project_id: int, user_info=Depends(Permission())):
     return ResponseDto(data=catalog_tree)
 
 
-@router.delete('/delete/{ident}')
-async def delete(ident: int, user_info=Depends(Permission())):
-    await CatalogDao.delete_by_id(ident)
+@router.delete('/delete/{pk}')
+async def delete_catalog(pk: int, user_info=Depends(Permission())):
+    await CatalogDao.delete(pk)
     return ResponseDto(msg='删除成功')
 
 
 @router.put('/update')
-async def update(catalog: CatalogUpdateBody, user_info=Depends(Permission())):
+async def update_catalog(catalog: CatalogUpdateBody, user_info=Depends(Permission())):
     await CatalogDao.update(catalog)
     return ResponseDto(msg='更新成功')

@@ -9,7 +9,7 @@ router = APIRouter(prefix='/file')
 
 
 @router.post('/upload')
-async def upload(file: UploadFile = File(...), user_info=Depends(Permission())):
+async def upload_file(file: UploadFile = File(...), user_info=Depends(Permission())):
     content = file.file.read()
     file_path = os.path.join(FilePath.FILE_PATH, file.filename)
     with open(file_path, 'wb') as f:

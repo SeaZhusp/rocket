@@ -15,7 +15,7 @@ router = APIRouter(prefix="/user")
 
 
 @router.post("/create")
-async def create(user: UserCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
+async def create_user(user: UserCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await UserDao.create(user)
     return ResponseDto(msg='创建成功')
 
@@ -34,19 +34,19 @@ async def login(login_user: UserLoginBody):
 
 @router.get('/list')
 async def list_user(page: int = 1, limit: int = 10, search: str = None, user_info=Depends(Permission())):
-    total, users = await UserDao.query_with_fullname(page=page, limit=limit, search=search)
+    total, users = await UserDao.list(page=page, limit=limit, search=search)
     total_page = Utils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=users)
 
 
-@router.delete('/delete/{ident}')
-async def delete(ident: int, user_info=Depends(Permission(DutyEnum.admin))):
-    await UserDao.delete_by_id(ident=ident)
+@router.delete('/delete/{pk}')
+async def delete_user(pk: int, user_info=Depends(Permission(DutyEnum.admin))):
+    await UserDao.delete(pk=pk)
     return ResponseDto(msg="删除成功")
 
 
 @router.put('/update')
-async def update(user: UserUpdateBody, user_info=Depends(Permission(DutyEnum.admin))):
-    await UserDao.update_user(user)
+async def update_user(user: UserUpdateBody, user_info=Depends(Permission(DutyEnum.admin))):
+    await UserDao.update(user)
     return ResponseDto(msg="更新成功")

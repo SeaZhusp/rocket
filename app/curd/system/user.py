@@ -31,19 +31,19 @@ class UserDao(BaseCurd):
         return user
 
     @classmethod
-    async def query_with_fullname(cls, page: int = 1, limit: int = 10, search: str = None) -> (int, User):
+    async def list(cls, page: int = 1, limit: int = 10, search: str = None) -> (int, User):
         total, users = cls.get_with_pagination(page=page, limit=limit, _fields=UserDto, _sort=['create_time'],
                                                fullname=f"%{search}%" if search else None)
         return total, users
 
     @classmethod
     async def get_by_id(cls, user_id: int):
-        return cls.get_with_id(id=user_id)
+        return cls.get_with_id(pk=user_id)
 
     @classmethod
-    async def delete_by_id(cls, ident: int):
-        return cls.delete_with_id(ident=ident)
+    async def delete(cls, pk: int):
+        return cls.delete_with_id(pk=pk)
 
     @classmethod
-    async def update_user(cls, user: UserUpdateBody):
+    async def update(cls, user: UserUpdateBody):
         return cls.update_with_id(model=user)

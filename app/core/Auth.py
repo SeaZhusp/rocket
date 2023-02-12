@@ -3,7 +3,6 @@ from app.core.context import REQUEST_CONTEXT
 from fastapi import Header, Request
 
 from app.core.exc.exceptions import AuthException, PermissionException
-from app.core.Response import Response
 from app.curd.system.user import UserDao
 from app.core.TokenAuth import UserToken
 from app.core.Enums import DutyEnum
@@ -25,7 +24,6 @@ class Permission:
             user = await UserDao.get_by_id(user_info['id'])
             if user is None:
                 raise Exception("用户不存在")
-            user_info = Response.model_to_dict(user, "password")
         except PermissionException as e:
             raise e
         except Exception as e:

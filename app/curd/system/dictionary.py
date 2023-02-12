@@ -9,7 +9,7 @@ class DictDao(BaseCurd):
     model = Dict
 
     @classmethod
-    async def query_by_name(cls, page: int = 1, limit: int = 10, search: str = None):
+    async def list(cls, page: int = 1, limit: int = 10, search: str = None):
         total, dicts = cls.get_with_pagination(page=page, limit=limit, _sort=['create_time'],
                                                name=f"%{search}%" if search else None)
         return total, dicts
@@ -25,8 +25,8 @@ class DictDao(BaseCurd):
         return cls.insert_with_model(model_obj=o)
 
     @classmethod
-    async def delete_by_id(cls, ident):
-        return cls.delete_with_id(ident=ident)
+    async def delete(cls, pk):
+        return cls.delete_with_id(pk=pk)
 
     @classmethod
     async def update(cls, _dict):
@@ -42,7 +42,7 @@ class DictItemDao(BaseCurd):
     model = DictItem
 
     @classmethod
-    async def query_by_name(cls, search: int):
+    async def list(cls, search: int):
         dict_items = cls.get_with_params(dict_id=search, _sort=['sort'], _sort_type='asc')
         return dict_items
 
@@ -66,5 +66,5 @@ class DictItemDao(BaseCurd):
         return o
 
     @classmethod
-    async def delete_by_id(cls, ident):
-        return cls.delete_with_id(ident=ident)
+    async def delete(cls, pk):
+        return cls.delete_with_id(pk=pk)

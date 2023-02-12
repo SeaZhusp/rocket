@@ -17,57 +17,5 @@ class ResponseDto(GenericModel, Generic[DataT]):
         }
 
 
-class ListDto(GenericModel, Generic[DataT]):
-    lists: DataT
-
-
 class ListResponseDto(ResponseDto, Generic[DataT]):
     paging: dict = Field(...)
-
-
-def list_object_exclude(fields: list):
-    exclude_map = {"data": {"__all__": {*fields}}}
-    return exclude_map
-
-
-def object_exclude(fields: list):
-    exclude_map = {"data": {*fields}}
-    return exclude_map
-
-
-def list_exclude(fields: list):
-    exclude_map = {"data": {"__all__": {*fields}}}
-    return exclude_map
-
-
-class Response(object):
-
-    @staticmethod
-    def model_to_dict(obj, *ignore: str):
-        data = dict()
-        for c in obj.__table__.columns:
-            if c.name in ignore:
-                # 如果字段忽略, 则不进行转换
-                continue
-            val = getattr(obj, c.name)
-            if isinstance(val, datetime):
-                data[c.name] = val.strftime("%Y-%m-%d %H:%M:%S")
-            else:
-                data[c.name] = val
-        return data
-
-    @staticmethod
-    def model_to_list(data: list, *ignore: str):
-        return [Response.model_to_dict(x, *ignore) for x in data]
-
-    @staticmethod
-    def base_response(code, msg, data=None):
-        return dict(code=code, msg=msg, data=data)
-
-    # @staticmethod
-    # def success(msg="操作成功", data=None):
-    #     return Response.base_response(200, msg=msg, data=data)
-
-    # @staticmethod
-    # def failed(msg="操作失败", data=None):
-    #     return Response.base_response(code=-1, msg=msg, data=data)

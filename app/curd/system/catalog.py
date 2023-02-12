@@ -50,11 +50,11 @@ class CatalogDao(BaseCurd):
         return tree
 
     @classmethod
-    async def delete_by_id(cls, ident):
-        ant = cls.get_with_existed(parent_id=ident)
+    async def delete(cls, pk):
+        ant = cls.get_with_existed(parent_id=pk)
         if ant:
             raise BusinessException("存在子目录")
-        return cls.delete_with_id(ident=ident)
+        return cls.delete_with_id(pk=pk)
 
     @classmethod
     async def update(cls, catalog):

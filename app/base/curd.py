@@ -169,14 +169,14 @@ class BaseCurd(object):
 
     @classmethod
     @connect
-    def get_with_id(cls, session: Session, id: int):
+    def get_with_id(cls, session: Session, pk: int):
         """
         根据主键id查询数据
         :param session: 会话
-        :param id: 主键id
+        :param pk: 主键id
         :return:
         """
-        sql_obj = cls.query_wrapper(session, id=id)
+        sql_obj = cls.query_wrapper(session, id=pk)
         return sql_obj.first()
 
     @classmethod
@@ -257,14 +257,14 @@ class BaseCurd(object):
 
     @classmethod
     @connect
-    def delete_with_id(cls, session: Session, ident: int, **kwargs):
+    def delete_with_id(cls, session: Session, pk: int, **kwargs):
         """
         通过主键id删除数据
         :param session: 会话
-        :param ident: 主键id
+        :param pk: 主键id
         :return:
         """
-        query = cls.query_wrapper(session, id=ident, **kwargs)
+        query = cls.query_wrapper(session, id=pk, **kwargs)
         query_obj = query.first()
         if query_obj is None:
             raise BusinessException("数据不存在")

@@ -10,6 +10,6 @@ router = APIRouter(prefix='/env')
 
 
 @router.post('/create')
-async def create(env: EnvCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
+async def create_env(env: EnvCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await EnvDao.create(env)
     return ResponseDto(msg='创建成功')
