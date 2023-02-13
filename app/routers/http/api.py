@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends
 from app.core.Response import ResponseDto, ListResponseDto
 from app.core.Auth import Permission
 from app.curd.http.api import ApiDao
-from app.schema.http.api.api_in import ApiCreateBody
+from app.curd.system.catalog import CatalogDao
+from app.schema.http.api.api_in import ApiCreateBody, ApiUpdateBody
 from app.utils.utils import Utils
 
 router = APIRouter(prefix='/api')
@@ -30,11 +31,19 @@ async def list_api(project_id: int, catalog_id="", status="", level="", search="
 @router.get('/{pk}')
 async def get_api_detail(pk: int, user_info=Depends(Permission())):
     api = await ApiDao.detail(pk=pk)
+    catalog = await CatalogDao.detail(api.catalog_id)
     api.body = json.loads(api.body)
-    return ResponseDto(data=dict(api=api))
+    return ResponseDto(data=dict(api=api, catalog=catalog))
 
 
 @router.delete('/delete/{pk}')
 async def delete_api(pk: int, user_info=Depends(Permission())):
     await ApiDao.delete(pk=pk)
     return ResponseDto(msg='删除成功')
+
+
+@router.put('/update')
+async def update_api(api: ApiUpdateBody, user_info=Depends(Permission())):
+    fullname = user_info.get('fullname', '系统')
+    await ApiDao.update(api, fullname)
+    return ResponseDto(msg='更新成功')

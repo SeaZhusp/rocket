@@ -36,3 +36,8 @@ class ApiDao(BaseCurd):
     @classmethod
     async def delete(cls, pk: int):
         cls.delete_with_id(pk=pk)
+
+    @classmethod
+    async def update(cls, api, update_user):
+        api.update_user = update_user
+        return cls.update_with_id(model=api)

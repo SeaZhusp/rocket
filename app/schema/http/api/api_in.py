@@ -87,3 +87,7 @@ class ApiCreateBody(RocketBaseSchema):
     @validator('body')
     def body_to_str(cls, v):
         return json.dumps(v.dict())
+
+
+class ApiUpdateBody(ApiCreateBody):
+    id: int = Field(..., title='接口id', description='必传')

@@ -59,3 +59,7 @@ class CatalogDao(BaseCurd):
     @classmethod
     async def update(cls, catalog):
         return cls.update_with_id(model=catalog)
+
+    @classmethod
+    async def detail(cls, pk):
+        return cls.get_with_id(pk=pk)
