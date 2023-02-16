@@ -1,5 +1,5 @@
 import json
-from typing import List, Union, Dict
+from typing import List, Union
 
 from pydantic import Field, validator
 
@@ -9,7 +9,7 @@ from app.base.schema import RocketBaseSchema
 class Variable(RocketBaseSchema):
     key: str
     type: int
-    value: str
+    value: Union[str, int, float, bool, list, dict]
     desc: str
 
 
@@ -22,7 +22,7 @@ class Header(RocketBaseSchema):
 class FormData(RocketBaseSchema):
     key: str
     type: int
-    value: str
+    value: Union[str, int, float, bool, list, dict]
     desc: str
 
 
@@ -36,7 +36,7 @@ class Validator(RocketBaseSchema):
     actual: str
     comparator: str
     type: int
-    expect: str
+    expect: Union[str, int, float, bool, list, dict]
     desc: str
 
 
