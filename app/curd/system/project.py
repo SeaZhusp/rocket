@@ -41,10 +41,6 @@ class ProjectDao(BaseCurd):
     async def list_all(cls, project_type):
         return cls.get_with_params(type=project_type, _sort=['create_time'])
 
-
-class ProjectFacade(BaseCurd):
-    model = Project
-
     @classmethod
-    async def exist_by_id(cls, ident):
-        return cls.get_with_existed(filter_list=[cls.model.id == ident])
+    async def exist_by_id(cls, pk):
+        return cls.get_with_existed(filter_list=[cls.model.id == pk])

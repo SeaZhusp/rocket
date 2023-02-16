@@ -41,3 +41,7 @@ class ApiDao(BaseCurd):
     async def update(cls, api, update_user):
         api.update_user = update_user
         return cls.update_with_id(model=api)
+
+    @classmethod
+    async def exist_by_catalog_id(cls, catalog_id):
+        return cls.get_with_existed(filter_list=[cls.model.catalog_id == catalog_id])

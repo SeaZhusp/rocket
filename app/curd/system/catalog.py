@@ -1,8 +1,7 @@
-from collections import defaultdict
-
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCurd
-from app.curd.system.project import ProjectFacade
+from app.curd.http.api import ApiDao
+from app.curd.system.project import ProjectDao
 from app.models.system.catalog import Catalog
 
 
@@ -11,7 +10,7 @@ class CatalogDao(BaseCurd):
 
     @classmethod
     async def create(cls, catalog):
-        ant = await ProjectFacade.exist_by_id(catalog.project_id)
+        ant = await ProjectDao.exist_by_id(catalog.project_id)
         if not ant:
             raise BusinessException("项目不存在")
         if catalog.parent_id:
@@ -53,7 +52,10 @@ class CatalogDao(BaseCurd):
     async def delete(cls, pk):
         ant = cls.get_with_existed(parent_id=pk)
         if ant:
-            raise BusinessException("存在子目录")
+            raise BusinessException("存在子目录，不能删除")
+        api_ant = ApiDao.exist_by_catalog_id(pk)
+        if api_ant:
+            raise BusinessException("目录下存在接口，不能删除")
         return cls.delete_with_id(pk=pk)
 
     @classmethod
