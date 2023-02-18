@@ -24,12 +24,13 @@ async def create_env(env: EnvCreateBody, user_info=Depends(Permission(DutyEnum.a
     return ResponseDto(msg='创建成功')
 
 
-@router.get('/delete/{pk}')
+@router.delete('/delete/{pk}')
 async def delete_env(pk: int, user_info=Depends(Permission(DutyEnum.admin))):
+    await EnvDao.delete(pk=pk)
     return ResponseDto(msg='删除成功')
 
 
 @router.put('/update')
 async def update_env(env: EnvUpdateBody, user_info=Depends(Permission())):
-    pass
+    await EnvDao.update(env)
     return ResponseDto(msg='更新成功')

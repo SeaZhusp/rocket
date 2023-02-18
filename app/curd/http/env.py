@@ -19,3 +19,11 @@ class EnvDao(BaseCurd):
     async def list(cls, search, page: int = 1, limit: int = 10):
         return cls.get_with_pagination(page=page, limit=limit, _sort=['create_time'],
                                        name=f"%{search}%" if search else None)
+
+    @classmethod
+    async def delete(cls, pk):
+        cls.delete_with_id(pk=pk)
+
+    @classmethod
+    async def update(cls, env):
+        return cls.update_with_id(model=env)
