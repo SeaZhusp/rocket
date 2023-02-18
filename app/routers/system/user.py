@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
 from app.core.Enums import DutyEnum
+from app.curd.system.dictionary import DictDao
 from app.curd.system.user import UserDao
 from app.core.TokenAuth import UserToken
 from app.utils.utils import Utils
@@ -29,7 +30,8 @@ async def login(login_user: UserLoginBody):
     # 返回表示 dict() 的 JSON 字符串，只有当转换为json，模型里面的编码规则(json_encoders)才生效
     user_json: str = user_dto.json()
     token = UserToken.generate_token(json.loads(user_json))
-    return ResponseDto(data=dict(userInfo=user, token=token), msg="登录成功")
+    dicts = await DictDao.all_dict_items()
+    return ResponseDto(data=dict(userInfo=user, token=token, dicts=dicts), msg="登录成功")
 
 
 @router.get('/list')

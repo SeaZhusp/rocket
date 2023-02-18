@@ -37,6 +37,18 @@ class DictDao(BaseCurd):
         o = cls.update_with_id(model=_dict)
         return o
 
+    @classmethod
+    async def all_dict_items(cls):
+        all_dict_items = {}
+        dictionary_list = cls.get_with_params(status=1)
+        if len(dictionary_list) == 0:
+            raise BusinessException("没配置字典")
+        for dictionary in dictionary_list:
+            dict_id = dictionary.id
+            dict_items = await DictItemDao.list_enable(dict_id)
+            all_dict_items[dictionary.code] = dict_items
+        return all_dict_items
+
 
 class DictItemDao(BaseCurd):
     model = DictItem
@@ -44,6 +56,11 @@ class DictItemDao(BaseCurd):
     @classmethod
     async def list(cls, search: int):
         dict_items = cls.get_with_params(dict_id=search, _sort=['sort'], _sort_type='asc')
+        return dict_items
+
+    @classmethod
+    async def list_enable(cls, search: int):
+        dict_items = cls.get_with_params(dict_id=search, status=1, _sort=['sort'], _sort_type='asc')
         return dict_items
 
     @classmethod

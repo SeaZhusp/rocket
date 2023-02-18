@@ -23,8 +23,8 @@ class DictItem(RocketBaseModel):
     __tablename__ = 'sys_dict_item'
 
     dict_id = Column(INT, nullable=False, comment='字典id')
-    label = Column(String(16), nullable=False, comment='字典项名称')
-    value = Column(String(32), nullable=False, comment='字典值')
+    label = Column(String(128), nullable=False, comment='字典项名称')
+    value = Column(String(128), nullable=False, comment='字典值')
     sort = Column(INT, comment='排序')
     status = Column(INT, default=1, comment='1启用 0禁用')
 

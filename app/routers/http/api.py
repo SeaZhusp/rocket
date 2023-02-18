@@ -12,13 +12,6 @@ from app.utils.utils import Utils
 router = APIRouter(prefix='/api')
 
 
-@router.post('/create')
-async def create_api(api: ApiCreateBody, user_info=Depends(Permission())):
-    fullname = user_info.get('fullname', '系统')
-    await ApiDao.create(api, fullname)
-    return ResponseDto(msg="创建成功")
-
-
 @router.get('/list')
 async def list_api(project_id: int, catalog_id="", status="", level="", search="", page: int = 1,
                    limit: int = 10, user_info=Depends(Permission())):
@@ -26,6 +19,13 @@ async def list_api(project_id: int, catalog_id="", status="", level="", search="
     total_page = Utils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=apis)
+
+
+@router.post('/create')
+async def create_api(api: ApiCreateBody, user_info=Depends(Permission())):
+    fullname = user_info.get('fullname', '系统')
+    await ApiDao.create(api, fullname)
+    return ResponseDto(msg="创建成功")
 
 
 @router.get('/{pk}')
