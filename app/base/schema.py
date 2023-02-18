@@ -80,4 +80,4 @@ class EnvConfig(RocketBaseSchema):
     variables: Union[List[Variable], None] = None
     headers: Union[List[Header], None] = None
     hooks: Union[Hooks, None] = None
-    service: Union[Service, None] = None
+    service: Union[List[Service], None] = None
