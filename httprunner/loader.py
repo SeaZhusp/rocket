@@ -94,10 +94,10 @@ def load_testsuite(testsuite: Dict) -> TestSuite:
 
 
 def load_dot_env_file(dot_env_path: Text) -> Dict:
-    """ load .env file.
+    """ load .config file.
 
     Args:
-        dot_env_path (str): .env file path
+        dot_env_path (str): .config file path
 
     Returns:
         dict: environment variables mapping
@@ -109,7 +109,7 @@ def load_dot_env_file(dot_env_path: Text) -> Dict:
             }
 
     Raises:
-        exceptions.FileFormatError: If .env file format is invalid.
+        exceptions.FileFormatError: If .config file format is invalid.
 
     """
     if not os.path.isfile(dot_env_path):
@@ -129,7 +129,7 @@ def load_dot_env_file(dot_env_path: Text) -> Dict:
             elif b":" in line:
                 variable, value = line.split(b":", 1)
             else:
-                raise exceptions.FileFormatError(".env format error")
+                raise exceptions.FileFormatError(".config format error")
 
             env_variables_mapping[
                 variable.strip().decode("utf-8")
@@ -376,7 +376,7 @@ def load_debugtalk_functions() -> Dict[Text, Callable]:
 
 
 def load_project_meta(test_path: Text, reload: bool = False) -> ProjectMeta:
-    """ load testcases, .env, debugtalk.py functions.
+    """ load testcases, .config, debugtalk.py functions.
         testcases folder is relative to project_root_directory
         by default, project_meta will be loaded only once, unless set reload to true.
 
@@ -403,11 +403,11 @@ def load_project_meta(test_path: Text, reload: bool = False) -> ProjectMeta:
     # add project RootDir to sys.path
     sys.path.insert(0, project_root_directory)
 
-    # load .env file
+    # load .config file
     # NOTICE:
     # environment variable maybe loaded in debugtalk.py
-    # thus .env file should be loaded before loading debugtalk.py
-    dot_env_path = os.path.join(project_root_directory, ".env")
+    # thus .config file should be loaded before loading debugtalk.py
+    dot_env_path = os.path.join(project_root_directory, ".config")
     dot_env = load_dot_env_file(dot_env_path)
     if dot_env:
         project_meta.env = dot_env

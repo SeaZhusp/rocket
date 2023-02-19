@@ -84,7 +84,7 @@ class TestCase(BaseModel):
 class ProjectMeta(BaseModel):
     debugtalk_py: Text = ""  # debugtalk.py file content
     debugtalk_path: Text = ""  # debugtalk.py file path
-    dot_env_path: Text = ""  # .env file path
+    dot_env_path: Text = ""  # .config file path
     functions: FunctionsMapping = {}  # functions defined in debugtalk.py
     env: Env = {}
     RootDir: Text = os.getcwd()  # project root directory (ensure absolute), the path debugtalk.py located
