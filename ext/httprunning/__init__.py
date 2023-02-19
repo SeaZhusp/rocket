@@ -1,7 +1,5 @@
-from ext.httprunning.runner import run_api, run_plan, run_testcase
+from ext.httprunning.runner import HttpRunning
 
 __all__ = [
-    "run_api",
-    "run_plan",
-    "run_testcase",
+    "HttpRunning"
 ]

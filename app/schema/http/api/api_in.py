@@ -29,3 +29,8 @@ class ApiCreateBody(RocketBaseSchema):
 
 class ApiUpdateBody(ApiCreateBody):
     id: int = Field(..., title="接口id", description="必传")
+
+
+class SingleApiRunBody(RocketBaseSchema):
+    api_id: int
+    config_id: int

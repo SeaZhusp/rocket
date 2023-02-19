@@ -2,12 +2,14 @@ import json
 
 from fastapi import APIRouter, Depends
 
-from app.core.Response import ResponseDto, ListResponseDto
-from app.core.Auth import Permission
-from app.curd.http.api import ApiDao
-from app.curd.system.catalog import CatalogDao
-from app.schema.http.api.api_in import ApiCreateBody, ApiUpdateBody
+from app.curd.http.config import ConfigDao
 from app.utils.utils import Utils
+from app.curd.http.api import ApiDao
+from app.core.Auth import Permission
+from app.curd.system.catalog import CatalogDao
+from app.core.Response import ResponseDto, ListResponseDto
+from app.schema.http.api.api_in import ApiCreateBody, ApiUpdateBody, SingleApiRunBody
+from ext.httprunning import HttpRunning
 
 router = APIRouter(prefix="/api")
 
@@ -47,3 +49,12 @@ async def update_api(api: ApiUpdateBody, user_info=Depends(Permission())):
     fullname = user_info.get("fullname", "系统")
     await ApiDao.update(api, fullname)
     return ResponseDto(msg="更新成功")
+
+
+@router.post("/run")
+async def run_apis(single_api: SingleApiRunBody):
+    api = await ApiDao.get_detail_with_id(pk=single_api.api_id)
+    config = await ConfigDao.get_detail_with_id(pk=single_api.config_id)
+    http_run = HttpRunning([api.to_dict()], config.to_dict())
+    summary = http_run.run_testcase()
+    return ResponseDto(data=summary)

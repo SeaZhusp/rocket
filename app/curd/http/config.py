@@ -27,3 +27,7 @@ class ConfigDao(BaseCurd):
     @classmethod
     async def update(cls, env):
         return cls.update_with_id(model=env)
+
+    @classmethod
+    async def get_detail_with_id(cls, pk):
+        return cls.get_with_id(pk=pk)
