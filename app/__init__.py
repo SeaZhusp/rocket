@@ -25,7 +25,7 @@ async def request_info(request: Request):
         headers = request.headers
         if params:
             log_msg += f"路径参数: {parse.unquote(str(params))}"
-        if body and 'application/json' in headers.get('content-type'):
+        if body and "application/json" in headers.get("content-type"):
             try:
                 body = json.dumps(json.loads(body), ensure_ascii=False)
                 log_msg += f"请求参数: {body}"
@@ -76,5 +76,5 @@ async def create_global_exception_handler(_app: FastAPI):
 
 def init_logging(logging_conf=LOGGING_CONF):
     for log_handler, log_conf in logging_conf.items():
-        log_file = log_conf.pop('file', None)
+        log_file = log_conf.pop("file", None)
         logger.add(log_file, **log_conf)

@@ -15,7 +15,7 @@ class User(RocketBaseModel):
     duty = Column(INT, default=DutyEnum.member.value, comment="0: 普通用户 1: 组长 2: 管理员")
     status = Column(INT, default=StatusEnum.enable.value, comment="0:启用 1:禁用")
 
-    def __init__(self, username, fullname, password, email='', phone=''):
+    def __init__(self, username, fullname, password, email="", phone=""):
         super().__init__()
         self.username = username
         self.password = password

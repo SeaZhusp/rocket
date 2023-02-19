@@ -16,6 +16,6 @@ class UserToken(object):
     @staticmethod
     def parse_token(token: str) -> dict:
         try:
-            return jwt.decode(token, key=Config.TOKEN_KEY, algorithms=['HS256'])
+            return jwt.decode(token, key=Config.TOKEN_KEY, algorithms=["HS256"])
         except ExpiredSignatureError:
             raise Exception("token已过期, 请重新登录")

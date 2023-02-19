@@ -20,22 +20,22 @@ class UserCreateBody(BaseUserBody):
     email: Union[str, None] = Field(default=None, max_length=64)
     phone: Union[str, None] = Field(default=None, max_length=16)
 
-    @validator('username', 'password', 'fullname')
+    @validator("username", "password", "fullname")
     def check_fields(cls, v):
         return StringUtils.not_empty(v)
 
-    @validator('password')
+    @validator("password")
     def password_to_md5(cls, v):
         return Crypto.md5(f"{v}{Config.TOKEN_KEY}")
 
 
 class UserLoginBody(BaseUserBody):
 
-    @validator('username', 'password')
+    @validator("username", "password")
     def name_not_empty(cls, v):
         return StringUtils.not_empty(v)
 
-    @validator('password')
+    @validator("password")
     def password_to_md5(cls, v):
         return Crypto.md5(f"{v}{Config.TOKEN_KEY}")
 

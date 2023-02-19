@@ -10,7 +10,7 @@ class DictDao(BaseCurd):
 
     @classmethod
     async def list(cls, page: int = 1, limit: int = 10, search: str = None):
-        total, dicts = cls.get_with_pagination(page=page, limit=limit, _sort=['create_time'],
+        total, dicts = cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"],
                                                name=f"%{search}%" if search else None)
         return total, dicts
 
@@ -55,12 +55,12 @@ class DictItemDao(BaseCurd):
 
     @classmethod
     async def list(cls, search: int):
-        dict_items = cls.get_with_params(dict_id=search, _sort=['sort'], _sort_type='asc')
+        dict_items = cls.get_with_params(dict_id=search, _sort=["sort"], _sort_type="asc")
         return dict_items
 
     @classmethod
     async def list_enable(cls, search: int):
-        dict_items = cls.get_with_params(dict_id=search, status=1, _sort=['sort'], _sort_type='asc')
+        dict_items = cls.get_with_params(dict_id=search, status=1, _sort=["sort"], _sort_type="asc")
         return dict_items
 
     @classmethod

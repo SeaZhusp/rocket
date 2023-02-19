@@ -26,17 +26,17 @@ async def body_validation_exception_handler(request: Request, err: RequestValida
     for raw_error in err.raw_errors:
         if isinstance(raw_error.exc, ValidationError):
             exc = raw_error.exc
-            if hasattr(exc, 'model'):
-                fields = exc.model.__dict__.get('__fields__')
+            if hasattr(exc, "model"):
+                fields = exc.model.__dict__.get("__fields__")
                 for field_key in fields.keys():
                     field_title = fields.get(field_key).field_info.title
                     data[field_key] = field_title if field_title else field_key
             for error in exc.errors():
-                field = str(error.get('loc')[-1])
+                field = str(error.get("loc")[-1])
                 _msg = error.get("msg")
                 message += f"{data.get(field, field)}{_msg},"
         elif isinstance(raw_error.exc, json.JSONDecodeError):
-            message += 'json解析失败! '
+            message += "json解析失败! "
     res = ResponseDto(code=CodeEnum.PARAMS_ERROR.code, msg=f"请求参数非法!{message[:-1]}")
     return JSONResponse(content=res.dict())
 

@@ -12,10 +12,10 @@ class EnvCreateBody(RocketBaseSchema):
     desc: Union[str, None]
     config: EnvConfig
 
-    @validator('config')
+    @validator("config")
     def config_to_str(cls, v):
         return json.dumps(v.dict())
 
 
 class EnvUpdateBody(EnvCreateBody):
-    id: int = Field(..., title='环境id', description='必传')
+    id: int = Field(..., title="环境id", description="必传")

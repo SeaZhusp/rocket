@@ -25,7 +25,7 @@ class ApiDao(BaseCurd):
             kwargs.update(catalog_id=catalog_id)
         if search != "":
             kwargs.update(name=f"%{search}%")
-        total, apis = cls.get_with_pagination(page=page, limit=limit, _fields=ApiDto, _sort=['create_time'],
+        total, apis = cls.get_with_pagination(page=page, limit=limit, _fields=ApiDto, _sort=["create_time"],
                                               project_id=project_id, **kwargs)
         return total, apis
 

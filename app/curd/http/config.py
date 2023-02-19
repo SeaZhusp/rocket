@@ -17,7 +17,7 @@ class ConfigDao(BaseCurd):
 
     @classmethod
     async def list(cls, search, page: int = 1, limit: int = 10):
-        return cls.get_with_pagination(page=page, limit=limit, _sort=['create_time'],
+        return cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"],
                                        name=f"%{search}%" if search else None)
 
     @classmethod

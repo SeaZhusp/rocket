@@ -55,9 +55,9 @@ class BaseCurd(object):
         """
         filter_list = filter_list if filter_list else list()
         # 判断表是否有del_flag字段
-        if getattr(cls.model, 'deleted', None) and not delete_flg:
+        if getattr(cls.model, "deleted", None) and not delete_flg:
             # 只取未删除的数据
-            filter_list.append(getattr(cls.model, 'deleted') == DeleteEnum.no.value)
+            filter_list.append(getattr(cls.model, "deleted") == DeleteEnum.no.value)
         for k, v in kwargs.items():
             # 过滤None的字段值，注意 0 和 False
             if v is None:
@@ -67,7 +67,7 @@ class BaseCurd(object):
             else:
                 # 判断是否模糊查询，必须字符串，字符串开头%或者结尾%
                 like = isinstance(v, str) and (v.startswith("%") or v.endswith("%"))
-                if like and v != '%%':
+                if like and v != "%%":
                     filter_list.append(getattr(cls.model, k).like(v))
                 else:
                     filter_list.append(getattr(cls.model, k) == v)
@@ -75,7 +75,7 @@ class BaseCurd(object):
 
     @classmethod
     def query_wrapper(cls, session: Session, filter_list: list = None, _sort: list = None,
-                      _fields: Type[RocketBaseDto] = None, _group: list = None, _sort_type: bool = 'desc', **kwargs):
+                      _fields: Type[RocketBaseDto] = None, _group: list = None, _sort_type: bool = "desc", **kwargs):
         """
         查询数据
         :param session: 会话
@@ -100,7 +100,7 @@ class BaseCurd(object):
         if _sort:  # 有排序字段时，进行排序
             _sorts = []
             for d in _sort:
-                if _sort_type == 'asc':
+                if _sort_type == "asc":
                     _sorts.append(asc(getattr(cls.model, d)))
                 else:
                     _sorts.append(desc(getattr(cls.model, d)))
@@ -192,7 +192,7 @@ class BaseCurd(object):
         :return:
         """
         if isinstance(model, dict):
-            id = model['id']
+            id = model["id"]
             model_dict = model
         else:
             id = model.id
@@ -216,8 +216,8 @@ class BaseCurd(object):
             if user:
                 # todo: 更新人id和name
                 pass
-                # setattr(query_obj, 'update_id', user['id'])
-                # setattr(query_obj, 'update_name', user['username'])
+                # setattr(query_obj, "update_id", user["id"])
+                # setattr(query_obj, "update_name", user["username"])
         session.commit()
         # session.refresh(query_obj)
         return query_obj
@@ -234,9 +234,9 @@ class BaseCurd(object):
         :return:
         """
         # https://docs.sqlalchemy.org/en/14/errors.html#error-bhk3
-        if getattr(cls.model, 'update_id') and getattr(cls.model, 'update_name') and user:
-            kwargs['update_id'] = user['id']
-            kwargs['update_name'] = user['username']
+        if getattr(cls.model, "update_id") and getattr(cls.model, "update_name") and user:
+            kwargs["update_id"] = user["id"]
+            kwargs["update_name"] = user["username"]
         query_obj = session.query(cls.model).filter(*filter_list)
         query_obj.update(kwargs)
         session.commit()
@@ -268,7 +268,7 @@ class BaseCurd(object):
         query_obj = query.first()
         if query_obj is None:
             raise BusinessException("数据不存在")
-        setattr(query_obj, 'deleted', DeleteEnum.yes.value)
+        setattr(query_obj, "deleted", DeleteEnum.yes.value)
         session.commit()
         session.refresh(query_obj)
         return query_obj
@@ -277,7 +277,7 @@ class BaseCurd(object):
     @connect
     def get_with_join(cls, session: Session, page: int = 1, limit: int = 10, filter_list: list = None,
                       dto: RocketBaseDto = None, query_fields: list = [], _group: list = None,
-                      _sort_type: bool = 'desc', _sort: list = None, join_con: list = [], **kwargs):
+                      _sort_type: bool = "desc", _sort: list = None, join_con: list = [], **kwargs):
         _filter_list = cls.__filter_k_v(filter_list, **kwargs)
         field_list = []
         if dto:
@@ -293,7 +293,7 @@ class BaseCurd(object):
         if _sort:  # 有排序字段时，进行排序
             _sorts = []
             for d in _sort:
-                if _sort_type == 'asc':
+                if _sort_type == "asc":
                     _sorts.append(asc(getattr(cls.model, d)))
                 else:
                     _sorts.append(desc(getattr(cls.model, d)))
@@ -310,4 +310,4 @@ class BaseCurd(object):
     #     :return:
     #     """
     #     query = cls.query_wrapper(session, **kwargs)
-    #     return query.group_by(cls.model.id).count() if getattr(cls.model, 'id', None) else query.count()
+    #     return query.group_by(cls.model.id).count() if getattr(cls.model, "id", None) else query.count()

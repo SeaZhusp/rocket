@@ -2,26 +2,26 @@ import os
 
 
 class Config(object):
-    # MYSQL_HOST = '172.17.122.101'
-    MYSQL_HOST = '127.0.0.1'
-    MYSQL_USER = 'root'
-    MYSQL_PWD = '123456'
+    # MYSQL_HOST = "172.17.122.101"
+    MYSQL_HOST = "127.0.0.1"
+    MYSQL_USER = "root"
+    MYSQL_PWD = "123456"
     MYSQL_PORT = 3306
-    DBNAME = 'rocket'
+    DBNAME = "rocket"
 
-    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}'
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    TOKEN_KEY = 'rocket'
+    TOKEN_KEY = "rocket"
     TOKEN_EXPIRATION = 336
 
 
 HTTP_MSG_MAP = {
-    404: '请求路径找不到',
-    405: '请求方法不支持',
-    408: '请求超时',
-    500: '服务器内部错误',
-    302: '请求方法不支持'
+    404: "请求路径找不到",
+    405: "请求方法不支持",
+    408: "请求超时",
+    500: "服务器内部错误",
+    302: "请求方法不支持"
 }
 
 
@@ -38,30 +38,30 @@ class FilePath(object):
     if not os.path.isdir(FILE_PATH):
         os.mkdir(FILE_PATH)
 
-    ROCKET_SERVER = os.path.join(LOG_FILE_PATH, 'rocket_server.log')
+    ROCKET_SERVER = os.path.join(LOG_FILE_PATH, "rocket_server.log")
 
-    ROCKET_ERROR = os.path.join(LOG_FILE_PATH, 'rocket_error.log')
+    ROCKET_ERROR = os.path.join(LOG_FILE_PATH, "rocket_error.log")
 
 
 # 项目日志滚动配置（日志文件超过10 MB就自动新建文件扩充）
 LOGGING_ROTATION = "10 MB"
 # 项目日志配置
 LOGGING_CONF = {
-    'server_handler': {
-        'file': FilePath.ROCKET_SERVER,
-        'level': 'INFO',
-        'rotation': LOGGING_ROTATION,
-        'enqueue': True,
-        'backtrace': False,
-        'diagnose': False,
+    "server_handler": {
+        "file": FilePath.ROCKET_SERVER,
+        "level": "INFO",
+        "rotation": LOGGING_ROTATION,
+        "enqueue": True,
+        "backtrace": False,
+        "diagnose": False,
     },
-    'error_handler': {
-        'file': FilePath.ROCKET_ERROR,
-        'level': 'ERROR',
-        'rotation': LOGGING_ROTATION,
-        'enqueue': True,
-        'backtrace': True,
-        'diagnose': True,
+    "error_handler": {
+        "file": FilePath.ROCKET_ERROR,
+        "level": "ERROR",
+        "rotation": LOGGING_ROTATION,
+        "enqueue": True,
+        "backtrace": True,
+        "diagnose": True,
     },
 }
 

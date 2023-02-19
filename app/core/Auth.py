@@ -21,7 +21,7 @@ class Permission:
             user_info = UserToken.parse_token(token)
             if user_info.get("duty", 0) < self.duty:
                 raise PermissionException()
-            user = await UserDao.get_by_id(user_info['id'])
+            user = await UserDao.get_by_id(user_info["id"])
             if user is None:
                 raise Exception("用户不存在")
         except PermissionException as e:

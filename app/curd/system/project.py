@@ -19,7 +19,7 @@ class ProjectDao(BaseCurd):
 
     @classmethod
     async def list(cls, page: int = 1, limit: int = 10, search: str = None):
-        total, projects = cls.get_with_pagination(page=page, limit=limit, _sort=['create_time'],
+        total, projects = cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"],
                                                   name=f"%{search}%" if search else None)
         # total, projects = cls.get_with_join(page=page, limit=limit, query_fields=[User.fullname],
         #                                     join_con=[User, User.id == Project.owner])
@@ -39,7 +39,7 @@ class ProjectDao(BaseCurd):
 
     @classmethod
     async def list_all(cls, project_type):
-        return cls.get_with_params(type=project_type, _sort=['create_time'])
+        return cls.get_with_params(type=project_type, _sort=["create_time"])
 
     @classmethod
     async def exist_by_id(cls, pk):

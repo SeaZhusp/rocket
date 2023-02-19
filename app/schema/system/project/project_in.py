@@ -11,7 +11,7 @@ class ProjectCreateBody(RocketBaseSchema):
     type: int = Field(..., title="项目类型", description="必传")
     description: Union[str, None]
 
-    @validator('name', 'type')
+    @validator("name", "type")
     def check_fields(cls, v):
         return StringUtils.not_empty(v)
 

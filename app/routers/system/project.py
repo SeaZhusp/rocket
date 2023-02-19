@@ -13,10 +13,10 @@ router = APIRouter(prefix="/project")
 @router.post("/create")
 async def create_project(project: ProjectCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await ProjectDao.create(project)
-    return ResponseDto(msg='创建成功')
+    return ResponseDto(msg="创建成功")
 
 
-@router.get('/list')
+@router.get("/list")
 async def list_project(page: int = 1, limit: int = 10, search: str = None,
                        user_info=Depends(Permission(DutyEnum.admin))):
     total, projects = await ProjectDao.list(page=page, limit=limit, search=search)
@@ -25,19 +25,19 @@ async def list_project(page: int = 1, limit: int = 10, search: str = None,
     return ListResponseDto(paging=paging, data=projects)
 
 
-@router.delete('/delete/{pk}')
+@router.delete("/delete/{pk}")
 async def delete_project(pk: int, user_info=Depends(Permission(DutyEnum.admin))):
     await ProjectDao.delete(pk=pk)
     return ResponseDto(msg="删除成功")
 
 
-@router.put('/update')
+@router.put("/update")
 async def update_project(project: ProjectUpdateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await ProjectDao.update(project)
     return ResponseDto(msg="更新成功")
 
 
-@router.get('/all')
+@router.get("/all")
 async def list_all_project(project_type: int, user_info=Depends(Permission())):
     projects = await ProjectDao.list_all(project_type)
     return ResponseDto(data=projects)

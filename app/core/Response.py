@@ -8,7 +8,7 @@ DataT = TypeVar("DataT")
 
 class ResponseDto(GenericModel, Generic[DataT]):
     code: int = Field(200, title="返参code")
-    msg: str = Field('请求成功', title="返参msg")
+    msg: str = Field("请求成功", title="返参msg")
     data: DataT = Field(None, title="返参data")  # 可能data没数据，没数据为null
 
     class Config:

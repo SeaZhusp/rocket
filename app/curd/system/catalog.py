@@ -29,8 +29,8 @@ class CatalogDao(BaseCurd):
         tree = list()
         source = list()
         tree_dict = dict()
-        catalogs = cls.get_with_params(filter_list=[cls.model.project_id == project_id], _sort=['create_time'],
-                                       _sort_type='asc')
+        catalogs = cls.get_with_params(filter_list=[cls.model.project_id == project_id], _sort=["create_time"],
+                                       _sort_type="asc")
         for catalog in catalogs:
             source.append(dict(label=catalog.name,
                                id=catalog.id,

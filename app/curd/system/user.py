@@ -32,7 +32,7 @@ class UserDao(BaseCurd):
 
     @classmethod
     async def list(cls, page: int = 1, limit: int = 10, search: str = None) -> (int, User):
-        total, users = cls.get_with_pagination(page=page, limit=limit, _fields=UserDto, _sort=['create_time'],
+        total, users = cls.get_with_pagination(page=page, limit=limit, _fields=UserDto, _sort=["create_time"],
                                                fullname=f"%{search}%" if search else None)
         return total, users
 
