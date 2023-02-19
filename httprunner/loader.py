@@ -1,68 +1,145 @@
-import collections
-import copy
 import csv
 import importlib
-import io
 import json
 import os
 import sys
+import types
+from typing import Callable, Dict, List, Text, Tuple, Union
 
 import yaml
-from httprunner import built_in, exceptions, logger, parser, utils, validator
+from loguru import logger
+from pydantic import ValidationError
 
-try:
-    # PyYAML version >= 5.1
-    # ref: https://github.com/yaml/pyyaml/wiki/PyYAML-yaml.load(input)-Deprecation
-    yaml.warnings({'YAMLLoadWarning': False})
-except AttributeError:
-    pass
+from httprunner import builtin, exceptions, utils
+from httprunner.models import ProjectMeta, TestCase, TestSuite
 
-###############################################################################
-##   file loader
-###############################################################################
-
-def _check_format(file_path, content):
-    """ check testcase format if valid
-    """
-    # TODO: replace with JSON schema validation
-    if not content:
-        # testcase file content is empty
-        err_msg = u"Testcase file content is empty: {}".format(file_path)
-        logger.log_error(err_msg)
-        raise exceptions.FileFormatError(err_msg)
-
-    elif not isinstance(content, (list, dict)):
-        # testcase file content does not match testcase format
-        err_msg = u"Testcase file content format invalid: {}".format(file_path)
-        logger.log_error(err_msg)
-        raise exceptions.FileFormatError(err_msg)
+project_meta: Union[ProjectMeta, None] = None
 
 
-def load_yaml_file(yaml_file):
+def _load_yaml_file(yaml_file: Text) -> Dict:
     """ load yaml file and check file content format
     """
-    with io.open(yaml_file, 'r', encoding='utf-8') as stream:
-        yaml_content = yaml.load(stream)
-        _check_format(yaml_file, yaml_content)
+    with open(yaml_file, mode="rb") as stream:
+        try:
+            yaml_content = yaml.load(stream, Loader=yaml.FullLoader)
+        except yaml.YAMLError as ex:
+            err_msg = f"YAMLError:\nfile: {yaml_file}\nerror: {ex}"
+            logger.error(err_msg)
+            raise exceptions.FileFormatError
+
         return yaml_content
 
 
-def load_json_file(json_file):
+def _load_json_file(json_file: Text) -> Dict:
     """ load json file and check file content format
     """
-    with io.open(json_file, encoding='utf-8') as data_file:
+    with open(json_file, mode="rb") as data_file:
         try:
             json_content = json.load(data_file)
-        except exceptions.JSONDecodeError:
-            err_msg = u"JSONDecodeError: JSON file format error: {}".format(json_file)
-            logger.log_error(err_msg)
+        except json.JSONDecodeError as ex:
+            err_msg = f"JSONDecodeError:\nfile: {json_file}\nerror: {ex}"
             raise exceptions.FileFormatError(err_msg)
 
-        _check_format(json_file, json_content)
         return json_content
 
 
-def load_csv_file(csv_file):
+def load_test_file(test_file: Text) -> Dict:
+    """load testcase/testsuite file content"""
+    if not os.path.isfile(test_file):
+        raise exceptions.FileNotFound(f"test file not exists: {test_file}")
+
+    file_suffix = os.path.splitext(test_file)[1].lower()
+    if file_suffix == ".json":
+        test_file_content = _load_json_file(test_file)
+    elif file_suffix in [".yaml", ".yml"]:
+        test_file_content = _load_yaml_file(test_file)
+    else:
+        # '' or other suffix
+        raise exceptions.FileFormatError(
+            f"testcase/testsuite file should be YAML/JSON format, invalid format file: {test_file}"
+        )
+
+    return test_file_content
+
+
+def load_testcase(testcase: Dict) -> TestCase:
+    try:
+        # validate with pydantic TestCase model
+        testcase_obj = TestCase.parse_obj(testcase)
+    except ValidationError as ex:
+        err_msg = f"TestCase ValidationError:\nerror: {ex}\ncontent: {testcase}"
+        raise exceptions.TestCaseFormatError(err_msg)
+
+    return testcase_obj
+
+
+def load_testcase_file(testcase_file: Text) -> TestCase:
+    """load testcase file and validate with pydantic model"""
+    testcase_content = load_test_file(testcase_file)
+    testcase_obj = load_testcase(testcase_content)
+    testcase_obj.config.path = testcase_file
+    return testcase_obj
+
+
+def load_testsuite(testsuite: Dict) -> TestSuite:
+    path = testsuite["config"]["path"]
+    try:
+        # validate with pydantic TestCase model
+        testsuite_obj = TestSuite.parse_obj(testsuite)
+    except ValidationError as ex:
+        err_msg = f"TestSuite ValidationError:\nfile: {path}\nerror: {ex}"
+        raise exceptions.TestSuiteFormatError(err_msg)
+
+    return testsuite_obj
+
+
+def load_dot_env_file(dot_env_path: Text) -> Dict:
+    """ load .env file.
+
+    Args:
+        dot_env_path (str): .env file path
+
+    Returns:
+        dict: environment variables mapping
+
+            {
+                "UserName": "debugtalk",
+                "Password": "123456",
+                "PROJECT_KEY": "ABCDEFGH"
+            }
+
+    Raises:
+        exceptions.FileFormatError: If .env file format is invalid.
+
+    """
+    if not os.path.isfile(dot_env_path):
+        return {}
+
+    logger.info(f"Loading environment variables from {dot_env_path}")
+    env_variables_mapping = {}
+
+    with open(dot_env_path, mode="rb") as fp:
+        for line in fp:
+            # maxsplit=1
+            line = line.strip()
+            if not len(line) or line.startswith(b"#"):
+                continue
+            if b"=" in line:
+                variable, value = line.split(b"=", 1)
+            elif b":" in line:
+                variable, value = line.split(b":", 1)
+            else:
+                raise exceptions.FileFormatError(".env format error")
+
+            env_variables_mapping[
+                variable.strip().decode("utf-8")
+            ] = value.strip().decode("utf-8")
+
+    utils.set_os_environ(env_variables_mapping)
+    return env_variables_mapping
+
+
+def load_csv_file(csv_file: Text) -> List[Dict]:
     """ load csv file and check file content format
 
     Args:
@@ -87,9 +164,12 @@ def load_csv_file(csv_file):
 
     """
     if not os.path.isabs(csv_file):
-        project_working_directory = tests_def_mapping["PWD"] or os.getcwd()
+        global project_meta
+        if project_meta is None:
+            raise exceptions.MyBaseFailure("load_project_meta() has not been called!")
+
         # make compatible with Windows/Linux
-        csv_file = os.path.join(project_working_directory, *csv_file.split("/"))
+        csv_file = os.path.join(project_meta.RootDir, *csv_file.split("/"))
 
     if not os.path.isfile(csv_file):
         # file path not exist
@@ -97,7 +177,7 @@ def load_csv_file(csv_file):
 
     csv_content_list = []
 
-    with io.open(csv_file, encoding='utf-8') as csvfile:
+    with open(csv_file, encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             csv_content_list.append(row)
@@ -105,26 +185,8 @@ def load_csv_file(csv_file):
     return csv_content_list
 
 
-def load_file(file_path):
-    if not os.path.isfile(file_path):
-        raise exceptions.FileNotFound("{} does not exist.".format(file_path))
-
-    file_suffix = os.path.splitext(file_path)[1].lower()
-    if file_suffix == '.json':
-        return load_json_file(file_path)
-    elif file_suffix in ['.yaml', '.yml']:
-        return load_yaml_file(file_path)
-    elif file_suffix == ".csv":
-        return load_csv_file(file_path)
-    else:
-        # '' or other suffix
-        err_msg = u"Unsupported file format: {}".format(file_path)
-        logger.log_warning(err_msg)
-        return []
-
-
-def load_folder_files(folder_path, recursive=True):
-    """ load folder path, return all files endswith yml/yaml/json in list.
+def load_folder_files(folder_path: Text, recursive: bool = True) -> List:
+    """ load folder path, return all files endswith .yml/.yaml/.json/_test.py in list.
 
     Args:
         folder_path (str): specified folder path to load
@@ -149,7 +211,7 @@ def load_folder_files(folder_path, recursive=True):
         filenames_list = []
 
         for filename in filenames:
-            if not filename.endswith(('.yml', '.yaml', '.json')):
+            if not filename.lower().endswith((".yml", ".yaml", ".json", "_test.py")):
                 continue
 
             filenames_list.append(filename)
@@ -164,85 +226,7 @@ def load_folder_files(folder_path, recursive=True):
     return file_list
 
 
-def load_dot_env_file(dot_env_path):
-    """ load .env file.
-
-    Args:
-        dot_env_path (str): .env file path
-
-    Returns:
-        dict: environment variables mapping
-
-            {
-                "UserName": "debugtalk",
-                "Password": "123456",
-                "PROJECT_KEY": "ABCDEFGH"
-            }
-
-    Raises:
-        exceptions.FileFormatError: If .env file format is invalid.
-
-    """
-    if not os.path.isfile(dot_env_path):
-        return {}
-
-    logger.log_info("Loading environment variables from {}".format(dot_env_path))
-    env_variables_mapping = {}
-
-    with io.open(dot_env_path, 'r', encoding='utf-8') as fp:
-        for line in fp:
-            # maxsplit=1
-            if "=" in line:
-                variable, value = line.split("=", 1)
-            elif ":" in line:
-                variable, value = line.split(":", 1)
-            else:
-                raise exceptions.FileFormatError(".env format error")
-
-            env_variables_mapping[variable.strip()] = value.strip()
-
-    utils.set_os_environ(env_variables_mapping)
-    return env_variables_mapping
-
-
-def locate_file(start_path, file_name):
-    """ locate filename and return absolute file path.
-        searching will be recursive upward until current working directory.
-
-    Args:
-        start_path (str): start locating path, maybe file path or directory path
-
-    Returns:
-        str: located file path. None if file not found.
-
-    Raises:
-        exceptions.FileNotFound: If failed to locate file.
-
-    """
-    if os.path.isfile(start_path):
-        start_dir_path = os.path.dirname(start_path)
-    elif os.path.isdir(start_path):
-        start_dir_path = start_path
-    else:
-        raise exceptions.FileNotFound("invalid path: {}".format(start_path))
-
-    file_path = os.path.join(start_dir_path, file_name)
-    if os.path.isfile(file_path):
-        return os.path.abspath(file_path)
-
-    # current working directory
-    if os.path.abspath(start_dir_path) in [os.getcwd(), os.path.abspath(os.sep)]:
-        raise exceptions.FileNotFound("{} not found in {}".format(file_name, start_path))
-
-    # locate recursive upward
-    return locate_file(os.path.dirname(start_dir_path), file_name)
-
-
-###############################################################################
-##   debugtalk.py module loader
-###############################################################################
-
-def load_module_functions(module):
+def load_module_functions(module) -> Dict[Text, Callable]:
     """ load python module functions.
 
     Args:
@@ -260,492 +244,62 @@ def load_module_functions(module):
     module_functions = {}
 
     for name, item in vars(module).items():
-        if validator.is_function(item):
+        if isinstance(item, types.FunctionType):
             module_functions[name] = item
 
     return module_functions
 
 
-def load_builtin_functions():
-    """ load built_in module functions
+def load_builtin_functions() -> Dict[Text, Callable]:
+    """ load builtin module functions
     """
-    return load_module_functions(built_in)
+    return load_module_functions(builtin)
 
 
-def load_debugtalk_functions():
-    """ load project debugtalk.py module functions
-        debugtalk.py should be located in project working directory.
+def locate_file(start_path: Text, file_name: Text) -> Text:
+    """ locate filename and return absolute file path.
+        searching will be recursive upward until system root dir.
+
+    Args:
+        file_name (str): target locate file name
+        start_path (str): start locating path, maybe file path or directory path
 
     Returns:
-        dict: debugtalk module functions mapping
-            {
-                "func1_name": func1,
-                "func2_name": func2
-            }
-
-    """
-    # load debugtalk.py module
-    imported_module = importlib.import_module("debugtalk")
-    return load_module_functions(imported_module)
-
-
-###############################################################################
-##   testcase loader
-###############################################################################
-
-project_mapping = {}
-tests_def_mapping = {
-    "PWD": None,
-    "api": {},
-    "testcases": {}
-}
-
-
-def __extend_with_api_ref(raw_testinfo):
-    """ extend with api reference
+        str: located file path. None if file not found.
 
     Raises:
-        exceptions.ApiNotFound: api not found
+        exceptions.FileNotFound: If failed to locate file.
 
     """
-    api_name = raw_testinfo["api"]
-
-    # api maybe defined in two types:
-    # 1, individual file: each file is corresponding to one api definition
-    # 2, api sets file: one file contains a list of api definitions
-    if not os.path.isabs(api_name):
-        # make compatible with Windows/Linux
-        api_path = os.path.join(tests_def_mapping["PWD"], *api_name.split("/"))
-        if os.path.isfile(api_path):
-            # type 1: api is defined in individual file
-            api_name = api_path
-
-    try:
-        block = tests_def_mapping["api"][api_name]
-        # NOTICE: avoid project_mapping been changed during iteration.
-        raw_testinfo["api_def"] = utils.deepcopy_dict(block)
-    except KeyError:
-        raise exceptions.ApiNotFound("{} not found!".format(api_name))
-
-
-def __extend_with_testcase_ref(raw_testinfo):
-    """ extend with testcase reference
-    """
-    testcase_path = raw_testinfo["testcase"]
-
-    if testcase_path not in tests_def_mapping["testcases"]:
-        # make compatible with Windows/Linux
-        testcase_path = os.path.join(
-            project_mapping["PWD"],
-            *testcase_path.split("/")
-        )
-        loaded_testcase = load_file(testcase_path)
-
-        if isinstance(loaded_testcase, list):
-            # make compatible with version < 2.2.0
-            testcase_dict = load_testcase(loaded_testcase)
-        elif isinstance(loaded_testcase, dict) and "teststeps" in loaded_testcase:
-            # format version 2, implemented in 2.2.0
-            testcase_dict = load_testcase_v2(loaded_testcase)
-        else:
-            raise exceptions.FileFormatError(
-                "Invalid format testcase: {}".format(testcase_path))
-
-        tests_def_mapping["testcases"][testcase_path] = testcase_dict
+    if os.path.isfile(start_path):
+        start_dir_path = os.path.dirname(start_path)
+    elif os.path.isdir(start_path):
+        start_dir_path = start_path
     else:
-        testcase_dict = tests_def_mapping["testcases"][testcase_path]
+        raise exceptions.FileNotFound(f"invalid path: {start_path}")
 
-    raw_testinfo["testcase_def"] = testcase_dict
+    file_path = os.path.join(start_dir_path, file_name)
+    if os.path.isfile(file_path):
+        # ensure absolute
+        return os.path.abspath(file_path)
 
+    # system root dir
+    # Windows, e.g. 'E:\\'
+    # Linux/Darwin, '/'
+    parent_dir = os.path.dirname(start_dir_path)
+    if parent_dir == start_dir_path:
+        raise exceptions.FileNotFound(f"{file_name} not found in {start_path}")
 
-def load_teststep(raw_testinfo):
-    """ load testcase step content.
-        teststep maybe defined directly, or reference api/testcase.
+    # locate recursive upward
+    return locate_file(parent_dir, file_name)
 
-    Args:
-        raw_testinfo (dict): test data, maybe in 3 formats.
-            # api reference
-            {
-                "name": "add product to cart",
-                "api": "/path/to/api",
-                "variables": {},
-                "validate": [],
-                "extract": {}
-            }
-            # testcase reference
-            {
-                "name": "add product to cart",
-                "testcase": "/path/to/testcase",
-                "variables": {}
-            }
-            # define directly
-            {
-                "name": "checkout cart",
-                "request": {},
-                "variables": {},
-                "validate": [],
-                "extract": {}
-            }
 
-    Returns:
-        dict: loaded teststep content
-
-    """
-    # reference api
-    if "api" in raw_testinfo:
-        __extend_with_api_ref(raw_testinfo)
-
-    # TODO: reference proc functions
-    # elif "func" in raw_testinfo:
-    #     pass
-
-    # reference testcase
-    elif "testcase" in raw_testinfo:
-        __extend_with_testcase_ref(raw_testinfo)
-
-    # define directly
-    else:
-        pass
-
-    return raw_testinfo
-
-
-def load_testcase(raw_testcase):
-    """ load testcase with api/testcase references.
-
-    Args:
-        raw_testcase (list): raw testcase content loaded from JSON/YAML file:
-            [
-                # config part
-                {
-                    "config": {
-                        "name": "XXXX",
-                        "base_url": "https://debugtalk.com"
-                    }
-                },
-                # teststeps part
-                {
-                    "test": {...}
-                },
-                {
-                    "test": {...}
-                }
-            ]
-
-    Returns:
-        dict: loaded testcase content
-            {
-                "config": {},
-                "teststeps": [test11, test12]
-            }
-
-    """
-    config = {}
-    tests = []
-
-    for item in raw_testcase:
-        key, test_block = item.popitem()
-        if key == "config":
-            config.update(test_block)
-        elif key == "test":
-            tests.append(load_teststep(test_block))
-        else:
-            logger.log_warning(
-                "unexpected block key: {}. block key should only be 'config' or 'test'.".format(key)
-            )
-
-    return {
-        "config": config,
-        "teststeps": tests
-    }
-
-
-def load_testcase_v2(raw_testcase):
-    """ load testcase in format version 2.
-
-    Args:
-        raw_testcase (dict): raw testcase content loaded from JSON/YAML file:
-            {
-                "config": {
-                    "name": "xxx",
-                    "variables": {}
-                }
-                "teststeps": [
-                    {
-                        "name": "teststep 1",
-                        "request" {...}
-                    },
-                    {
-                        "name": "teststep 2",
-                        "request" {...}
-                    },
-                ]
-            }
-
-    Returns:
-        dict: loaded testcase content
-            {
-                "config": {},
-                "teststeps": [test11, test12]
-            }
-
-    """
-    raw_teststeps = raw_testcase.pop("teststeps")
-    raw_testcase["teststeps"] = [
-        load_teststep(teststep)
-        for teststep in raw_teststeps
-    ]
-    return raw_testcase
-
-
-def load_testsuite(raw_testsuite):
-    """ load testsuite with testcase references.
-        support two different formats.
-
-    Args:
-        raw_testsuite (dict): raw testsuite content loaded from JSON/YAML file:
-            # version 1, compatible with version < 2.2.0
-            {
-                "config": {
-                    "name": "xxx",
-                    "variables": {}
-                }
-                "testcases": {
-                    "testcase1": {
-                        "testcase": "/path/to/testcase",
-                        "variables": {...},
-                        "parameters": {...}
-                    },
-                    "testcase2": {}
-                }
-            }
-
-            # version 2, implemented in 2.2.0
-            {
-                "config": {
-                    "name": "xxx",
-                    "variables": {}
-                }
-                "testcases": [
-                    {
-                        "name": "testcase1",
-                        "testcase": "/path/to/testcase",
-                        "variables": {...},
-                        "parameters": {...}
-                    },
-                    {}
-                ]
-            }
-
-    Returns:
-        dict: loaded testsuite content
-            {
-                "config": {},
-                "testcases": [testcase1, testcase2]
-            }
-
-    """
-    raw_testcases = raw_testsuite.pop("testcases")
-    raw_testsuite["testcases"] = {}
-
-    if isinstance(raw_testcases, dict):
-        # make compatible with version < 2.2.0
-        for name, raw_testcase in raw_testcases.items():
-            __extend_with_testcase_ref(raw_testcase)
-            raw_testcase.setdefault("name", name)
-            raw_testsuite["testcases"][name] = raw_testcase
-
-    elif isinstance(raw_testcases, list):
-        # format version 2, implemented in 2.2.0
-        for raw_testcase in raw_testcases:
-            __extend_with_testcase_ref(raw_testcase)
-            testcase_name = raw_testcase["name"]
-            raw_testsuite["testcases"][testcase_name] = raw_testcase
-
-    else:
-        # invalid format
-        raise exceptions.FileFormatError("Invalid testsuite format!")
-
-    return raw_testsuite
-
-
-def load_test_file(path):
-    """ load test file, file maybe testcase/testsuite/api
-
-    Args:
-        path (str): test file path
-
-    Returns:
-        dict: loaded test content
-
-            # api
-            {
-                "path": path,
-                "type": "api",
-                "name": "",
-                "request": {}
-            }
-
-            # testcase
-            {
-                "path": path,
-                "type": "testcase",
-                "config": {},
-                "teststeps": []
-            }
-
-            # testsuite
-            {
-                "path": path,
-                "type": "testsuite",
-                "config": {},
-                "testcases": {}
-            }
-
-    """
-    raw_content = load_file(path)
-    loaded_content = None
-
-    if isinstance(raw_content, dict):
-
-        if "testcases" in raw_content:
-            # file_type: testsuite
-            # TODO: add json schema validation for testsuite
-            loaded_content = load_testsuite(raw_content)
-            loaded_content["path"] = path
-            loaded_content["type"] = "testsuite"
-
-        elif "teststeps" in raw_content:
-            # file_type: testcase (format version 2)
-            loaded_content = load_testcase_v2(raw_content)
-            loaded_content["path"] = path
-            loaded_content["type"] = "testcase"
-
-        elif "request" in raw_content:
-            # file_type: api
-            # TODO: add json schema validation for api
-            loaded_content = raw_content
-            loaded_content["path"] = path
-            loaded_content["type"] = "api"
-
-        else:
-            # invalid format
-            raise exceptions.FileFormatError("Invalid test file format!")
-
-    elif isinstance(raw_content, list) and len(raw_content) > 0:
-        # file_type: testcase
-        # make compatible with version < 2.2.0
-        # TODO: add json schema validation for testcase
-        loaded_content = load_testcase(raw_content)
-        loaded_content["path"] = path
-        loaded_content["type"] = "testcase"
-
-    else:
-        # invalid format
-        raise exceptions.FileFormatError("Invalid test file format!")
-
-    return loaded_content
-
-
-def load_folder_content(folder_path):
-    """ load api/testcases/testsuites definitions from folder.
-
-    Args:
-        folder_path (str): api/testcases/testsuites files folder.
-
-    Returns:
-        dict: api definition mapping.
-
-            {
-                "tests/api/basic.yml": [
-                    {"api": {"def": "api_login", "request": {}, "validate": []}},
-                    {"api": {"def": "api_logout", "request": {}, "validate": []}}
-                ]
-            }
-
-    """
-    items_mapping = {}
-
-    for file_path in load_folder_files(folder_path):
-        items_mapping[file_path] = load_file(file_path)
-
-    return items_mapping
-
-
-def load_api_folder(api_folder_path):
-    """ load api definitions from api folder.
-
-    Args:
-        api_folder_path (str): api files folder.
-
-            api file should be in the following format:
-            [
-                {
-                    "api": {
-                        "def": "api_login",
-                        "request": {},
-                        "validate": []
-                    }
-                },
-                {
-                    "api": {
-                        "def": "api_logout",
-                        "request": {},
-                        "validate": []
-                    }
-                }
-            ]
-
-    Returns:
-        dict: api definition mapping.
-
-            {
-                "api_login": {
-                    "function_meta": {"func_name": "api_login", "args": [], "kwargs": {}}
-                    "request": {}
-                },
-                "api_logout": {
-                    "function_meta": {"func_name": "api_logout", "args": [], "kwargs": {}}
-                    "request": {}
-                }
-            }
-
-    """
-    api_definition_mapping = {}
-
-    api_items_mapping = load_folder_content(api_folder_path)
-
-    for api_file_path, api_items in api_items_mapping.items():
-        # TODO: add JSON schema validation
-        if isinstance(api_items, list):
-            for api_item in api_items:
-                key, api_dict = api_item.popitem()
-                api_id = api_dict.get("id") or api_dict.get("def") or api_dict.get("name")
-                if key != "api" or not api_id:
-                    raise exceptions.ParamsError(
-                        "Invalid API defined in {}".format(api_file_path))
-
-                if api_id in api_definition_mapping:
-                    raise exceptions.ParamsError(
-                        "Duplicated API ({}) defined in {}".format(api_id, api_file_path))
-                else:
-                    api_definition_mapping[api_id] = api_dict
-
-        elif isinstance(api_items, dict):
-            if api_file_path in api_definition_mapping:
-                raise exceptions.ParamsError(
-                    "Duplicated API defined: {}".format(api_file_path))
-            else:
-                api_definition_mapping[api_file_path] = api_items
-
-    return api_definition_mapping
-
-
-def locate_debugtalk_py(start_path):
+def locate_debugtalk_py(start_path: Text) -> Text:
     """ locate debugtalk.py file
 
     Args:
-        start_path (str): start locating path, maybe testcase file path or directory path
+        start_path (str): start locating path,
+            maybe testcase file path or directory path
 
     Returns:
         str: debugtalk.py file path, None if not found
@@ -760,37 +314,104 @@ def locate_debugtalk_py(start_path):
     return debugtalk_path
 
 
-def load_project_tests(test_path, dot_env_path=None):
-    """ load api, testcases, .env, debugtalk.py functions.
-        api/testcases folder is relative to project_working_directory
+def locate_project_root_directory(test_path: Text) -> Tuple[Text, Text]:
+    """ locate debugtalk.py path as project root directory
 
     Args:
-        test_path (str): test file/folder path, locate pwd from this path.
-        dot_env_path (str): specified .env file path
+        test_path: specified testfile path
 
     Returns:
-        dict: project loaded api/testcases definitions, environments and debugtalk.py functions.
+        (str, str): debugtalk.py path, project_root_directory
 
     """
+
+    def prepare_path(path):
+        if not os.path.exists(path):
+            err_msg = f"path not exist: {path}"
+            logger.error(err_msg)
+            raise exceptions.FileNotFound(err_msg)
+
+        if not os.path.isabs(path):
+            path = os.path.join(os.getcwd(), path)
+
+        return path
+
+    test_path = prepare_path(test_path)
+
     # locate debugtalk.py file
     debugtalk_path = locate_debugtalk_py(test_path)
 
     if debugtalk_path:
-        # The folder contains debugtalk.py will be treated as PWD.
-        project_working_directory = os.path.dirname(debugtalk_path)
+        # The folder contains debugtalk.py will be treated as project RootDir.
+        project_root_directory = os.path.dirname(debugtalk_path)
     else:
-        # debugtalk.py not found, use os.getcwd() as PWD.
-        project_working_directory = os.getcwd()
+        # debugtalk.py not found, use os.getcwd() as project RootDir.
+        project_root_directory = os.getcwd()
 
-    # add PWD to sys.path
-    sys.path.insert(0, project_working_directory)
+    return debugtalk_path, project_root_directory
+
+
+def load_debugtalk_functions() -> Dict[Text, Callable]:
+    """ load project debugtalk.py module functions
+        debugtalk.py should be located in project root directory.
+
+    Returns:
+        dict: debugtalk module functions mapping
+            {
+                "func1_name": func1,
+                "func2_name": func2
+            }
+
+    """
+    # load debugtalk.py module
+    try:
+        imported_module = importlib.import_module("debugtalk")
+    except Exception as ex:
+        logger.error(f"error occurred in debugtalk.py: {ex}")
+        sys.exit(1)
+
+    # reload to refresh previously loaded module
+    imported_module = importlib.reload(imported_module)
+    return load_module_functions(imported_module)
+
+
+def load_project_meta(test_path: Text, reload: bool = False) -> ProjectMeta:
+    """ load testcases, .env, debugtalk.py functions.
+        testcases folder is relative to project_root_directory
+        by default, project_meta will be loaded only once, unless set reload to true.
+
+    Args:
+        test_path (str): test file/folder path, locate project RootDir from this path.
+        reload: reload project meta if set true, default to false
+
+    Returns:
+        project loaded api/testcases definitions,
+            environments and debugtalk.py functions.
+
+    """
+    global project_meta
+    if project_meta and (not reload):
+        return project_meta
+
+    project_meta = ProjectMeta()
+
+    if not test_path:
+        return project_meta
+
+    debugtalk_path, project_root_directory = locate_project_root_directory(test_path)
+
+    # add project RootDir to sys.path
+    sys.path.insert(0, project_root_directory)
 
     # load .env file
     # NOTICE:
     # environment variable maybe loaded in debugtalk.py
     # thus .env file should be loaded before loading debugtalk.py
-    dot_env_path = dot_env_path or os.path.join(project_working_directory, ".env")
-    project_mapping["env"] = load_dot_env_file(dot_env_path)
+    dot_env_path = os.path.join(project_root_directory, ".env")
+    dot_env = load_dot_env_file(dot_env_path)
+    if dot_env:
+        project_meta.env = dot_env
+        project_meta.dot_env_path = dot_env_path
 
     if debugtalk_path:
         # load debugtalk.py functions
@@ -798,104 +419,29 @@ def load_project_tests(test_path, dot_env_path=None):
     else:
         debugtalk_functions = {}
 
-    # locate PWD and load debugtalk.py functions
+    # locate project RootDir and load debugtalk.py functions
+    project_meta.RootDir = project_root_directory
+    project_meta.functions = debugtalk_functions
+    project_meta.debugtalk_path = debugtalk_path
 
-    project_mapping["PWD"] = project_working_directory
-    built_in.PWD = project_working_directory
-    project_mapping["functions"] = debugtalk_functions
-
-    # load api
-    tests_def_mapping["api"] = load_api_folder(os.path.join(project_working_directory, "api"))
-    tests_def_mapping["PWD"] = project_working_directory
+    return project_meta
 
 
-def load_tests(path, dot_env_path=None):
-    """ load testcases from file path, extend and merge with api/testcase definitions.
+def convert_relative_project_root_dir(abs_path: Text) -> Text:
+    """ convert absolute path to relative path, based on project_meta.RootDir
 
     Args:
-        path (str): testcase/testsuite file/foler path.
-            path could be in 2 types:
-                - absolute/relative file path
-                - absolute/relative folder path
-        dot_env_path (str): specified .env file path
+        abs_path: absolute path
 
-    Returns:
-        dict: tests mapping, include project_mapping and testcases.
-              each testcase is corresponding to a file.
-            {
-                "project_mapping": {
-                    "PWD": "XXXXX",
-                    "functions": {},
-                    "env": {}
-                },
-                "testcases": [
-                    {   # testcase data structure
-                        "config": {
-                            "name": "desc1",
-                            "path": "testcase1_path",
-                            "variables": [],                    # optional
-                        },
-                        "teststeps": [
-                            # test data structure
-                            {
-                                'name': 'test desc1',
-                                'variables': [],    # optional
-                                'extract': [],      # optional
-                                'validate': [],
-                                'request': {}
-                            },
-                            test_dict_2   # another test dict
-                        ]
-                    },
-                    testcase_2_dict     # another testcase dict
-                ],
-                "testsuites": [
-                    {   # testsuite data structure
-                        "config": {},
-                        "testcases": {
-                            "testcase1": {},
-                            "testcase2": {},
-                        }
-                    },
-                    testsuite_2_dict
-                ]
-            }
+    Returns: relative path based on project_meta.RootDir
 
     """
-    if not os.path.exists(path):
-        err_msg = "path not exist: {}".format(path)
-        logger.log_error(err_msg)
-        raise exceptions.FileNotFound(err_msg)
+    _project_meta = load_project_meta(abs_path)
+    if not abs_path.startswith(_project_meta.RootDir):
+        raise exceptions.ParamsError(
+            f"failed to convert absolute path to relative path based on project_meta.RootDir\n"
+            f"abs_path: {abs_path}\n"
+            f"project_meta.RootDir: {_project_meta.RootDir}"
+        )
 
-    if not os.path.isabs(path):
-        path = os.path.join(os.getcwd(), path)
-
-    load_project_tests(path, dot_env_path)
-    tests_mapping = {
-        "project_mapping": project_mapping
-    }
-
-    def __load_file_content(path):
-        try:
-            loaded_content = load_test_file(path)
-        except exceptions.FileFormatError:
-            logger.log_warning("Invalid test file format: {}".format(path))
-
-        if not loaded_content:
-            pass
-        elif loaded_content["type"] == "testsuite":
-            tests_mapping.setdefault("testsuites", []).append(loaded_content)
-        elif loaded_content["type"] == "testcase":
-            tests_mapping.setdefault("testcases", []).append(loaded_content)
-        elif loaded_content["type"] == "api":
-            tests_mapping.setdefault("apis", []).append(loaded_content)
-
-    if os.path.isdir(path):
-        files_list = load_folder_files(path)
-        for path in files_list:
-            __load_file_content(path)
-
-    elif os.path.isfile(path):
-        __load_file_content(path)
-
-    return tests_mapping
+    return abs_path[len(_project_meta.RootDir) + 1:]

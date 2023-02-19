@@ -1,202 +1,162 @@
-# encoding: utf-8
+import argparse
+import enum
+import os
+import sys
 
-def main_hrun():
-    """ API test: parse command line options and run commands.
-    """
-    import argparse
-    from httprunner import logger
-    from httprunner import __description__, __version__
-    from httprunner.api import HttpRunner
-    from httprunner.compat import is_py2
-    from httprunner.validator import validate_json_file
-    from httprunner.utils import (create_scaffold, get_python2_retire_msg,
-                                prettify_json_file)
+import pytest
+from loguru import logger
 
-    parser = argparse.ArgumentParser(description=__description__)
-    parser.add_argument(
-        '-V', '--version', dest='version', action='store_true',
-        help="show version")
-    parser.add_argument(
-        'testcase_paths', nargs='*',
-        help="testcase file path")
-    parser.add_argument(
-        '--log-level', default='INFO',
-        help="Specify logging level, default is INFO.")
-    parser.add_argument(
-        '--log-file',
-        help="Write logs to specified file path.")
-    parser.add_argument(
-        '--dot-env-path',
-        help="Specify .env file path, which is useful for keeping sensitive data.")
-    parser.add_argument(
-        '--report-template',
-        help="specify report template path.")
-    parser.add_argument(
-        '--report-dir',
-        help="specify report save directory.")
-    parser.add_argument(
-        '--failfast', action='store_true', default=False,
-        help="Stop the test run on the first error or failure.")
-    parser.add_argument(
-        '--save-tests', action='store_true', default=False,
-        help="Save loaded tests and parsed tests to JSON file.")
-    parser.add_argument(
-        '--startproject',
-        help="Specify new project name.")
-    parser.add_argument(
-        '--validate', nargs='*',
-        help="Validate JSON testcase format.")
-    parser.add_argument(
-        '--prettify', nargs='*',
-        help="Prettify JSON testcase format.")
+from httprunner import __description__, __version__
+from httprunner.compat import ensure_cli_args
+from httprunner.ext.har2case import init_har2case_parser, main_har2case
+from httprunner.make import init_make_parser, main_make
+from httprunner.scaffold import init_parser_scaffold, main_scaffold
+from httprunner.utils import init_sentry_sdk, ga_client
 
-    args = parser.parse_args()
-    logger.setup_logger(args.log_level, args.log_file)
+init_sentry_sdk()
 
-    if is_py2:
-        logger.log_warning(get_python2_retire_msg())
 
-    if args.version:
-        logger.color_print("{}".format(__version__), "GREEN")
-        exit(0)
-
-    if args.validate:
-        validate_json_file(args.validate)
-        exit(0)
-    if args.prettify:
-        prettify_json_file(args.prettify)
-        exit(0)
-
-    project_name = args.startproject
-    if project_name:
-        create_scaffold(project_name)
-        exit(0)
-
-    runner = HttpRunner(
-        failfast=args.failfast,
-        save_tests=args.save_tests,
-        report_template=args.report_template,
-        report_dir=args.report_dir
+def init_parser_run(subparsers):
+    sub_parser_run = subparsers.add_parser(
+        "run", help="Make HttpRunner testcases and run with pytest."
     )
-    try:
-        for path in args.testcase_paths:
-            runner.run(path, dot_env_path=args.dot_env_path)
-    except Exception:
-        logger.log_error("!!!!!!!!!! exception stage: {} !!!!!!!!!!".format(runner.exception_stage))
-        raise
-
-    return 0
+    return sub_parser_run
 
 
-def main_locust():
-    """ Performance test with locust: parse command line options and run commands.
-    """
-    try:
-        # monkey patch ssl at beginning to avoid RecursionError when running locust.
-        from gevent import monkey; monkey.patch_ssl()
-        import multiprocessing
-        import sys
-        from httprunner import logger
-        from httprunner import locusts
-    except ImportError:
-        msg = "Locust is not installed, install first and try again.\n"
-        msg += "install command: pip install locustio"
-        print(msg)
-        exit(1)
+def main_run(extra_args) -> enum.IntEnum:
+    ga_client.track_event("RunAPITests", "hrun")
+    # keep compatibility with v2
+    extra_args = ensure_cli_args(extra_args)
 
-    sys.argv[0] = 'locust'
-    if len(sys.argv) == 1:
-        sys.argv.extend(["-h"])
-
-    if sys.argv[1] in ["-h", "--help", "-V", "--version"]:
-        locusts.start_locust_main()
-        sys.exit(0)
-
-    # set logging level
-    if "-L" in sys.argv:
-        loglevel_index = sys.argv.index('-L') + 1
-    elif "--loglevel" in sys.argv:
-        loglevel_index = sys.argv.index('--loglevel') + 1
-    else:
-        loglevel_index = None
-
-    if loglevel_index and loglevel_index < len(sys.argv):
-        loglevel = sys.argv[loglevel_index]
-    else:
-        # default
-        loglevel = "WARNING"
-
-    logger.setup_logger(loglevel)
-
-    # get testcase file path
-    try:
-        if "-f" in sys.argv:
-            testcase_index = sys.argv.index('-f') + 1
-        elif "--locustfile" in sys.argv:
-            testcase_index = sys.argv.index('--locustfile') + 1
+    tests_path_list = []
+    extra_args_new = []
+    for item in extra_args:
+        if not os.path.exists(item):
+            # item is not file/folder path
+            extra_args_new.append(item)
         else:
-            testcase_index = None
+            # item is file/folder path
+            tests_path_list.append(item)
 
-        assert testcase_index and testcase_index < len(sys.argv)
-    except AssertionError:
-        print("Testcase file is not specified, exit.")
+    if len(tests_path_list) == 0:
+        # has not specified any testcase path
+        logger.error(f"No valid testcase path in cli arguments: {extra_args}")
         sys.exit(1)
 
-    testcase_file_path = sys.argv[testcase_index]
-    sys.argv[testcase_index] = locusts.parse_locustfile(testcase_file_path)
+    testcase_path_list = main_make(tests_path_list)
+    if not testcase_path_list:
+        logger.error("No valid testcases found, exit 1.")
+        sys.exit(1)
 
-    if "--processes" in sys.argv:
-        """ locusts -f locustfile.py --processes 4
-        """
-        if "--no-web" in sys.argv:
-            logger.log_error("conflict parameter args: --processes & --no-web. \nexit.")
-            sys.exit(1)
+    if "--tb=short" not in extra_args_new:
+        extra_args_new.append("--tb=short")
 
-        processes_index = sys.argv.index('--processes')
+    extra_args_new.extend(testcase_path_list)
+    logger.info(f"start to run tests with pytest. HttpRunner version: {__version__}")
+    return pytest.main(extra_args_new)
 
-        processes_count_index = processes_index + 1
 
-        if processes_count_index >= len(sys.argv):
-            """ do not specify processes count explicitly
-                locusts -f locustfile.py --processes
-            """
-            processes_count = multiprocessing.cpu_count()
-            logger.log_warning("processes count not specified, use {} by default.".format(processes_count))
-        else:
-            try:
-                """ locusts -f locustfile.py --processes 4 """
-                processes_count = int(sys.argv[processes_count_index])
-                sys.argv.pop(processes_count_index)
-            except ValueError:
-                """ locusts -f locustfile.py --processes -P 8888 """
-                processes_count = multiprocessing.cpu_count()
-                logger.log_warning("processes count not specified, use {} by default.".format(processes_count))
+def main():
+    """ API test: parse command line options and run commands.
+    """
+    parser = argparse.ArgumentParser(description=__description__)
+    parser.add_argument(
+        "-V", "--version", dest="version", action="store_true", help="show version"
+    )
 
-        sys.argv.pop(processes_index)
-        locusts.run_locusts_with_processes(sys.argv, processes_count)
+    subparsers = parser.add_subparsers(help="sub-command help")
+    sub_parser_run = init_parser_run(subparsers)
+    sub_parser_scaffold = init_parser_scaffold(subparsers)
+    sub_parser_har2case = init_har2case_parser(subparsers)
+    sub_parser_make = init_make_parser(subparsers)
+
+    if len(sys.argv) == 1:
+        # httprunner
+        parser.print_help()
+        sys.exit(0)
+    elif len(sys.argv) == 2:
+        # print help for sub-commands
+        if sys.argv[1] in ["-V", "--version"]:
+            # httprunner -V
+            print(f"{__version__}")
+        elif sys.argv[1] in ["-h", "--help"]:
+            # httprunner -h
+            parser.print_help()
+        elif sys.argv[1] == "startproject":
+            # httprunner startproject
+            sub_parser_scaffold.print_help()
+        elif sys.argv[1] == "har2case":
+            # httprunner har2case
+            sub_parser_har2case.print_help()
+        elif sys.argv[1] == "run":
+            # httprunner run
+            pytest.main(["-h"])
+        elif sys.argv[1] == "make":
+            # httprunner make
+            sub_parser_make.print_help()
+        sys.exit(0)
+    elif (
+        len(sys.argv) == 3 and sys.argv[1] == "run" and sys.argv[2] in ["-h", "--help"]
+    ):
+        # httprunner run -h
+        pytest.main(["-h"])
+        sys.exit(0)
+
+    extra_args = []
+    if len(sys.argv) >= 2 and sys.argv[1] in ["run", "locusts"]:
+        args, extra_args = parser.parse_known_args()
     else:
-        locusts.start_locust_main()
+        args = parser.parse_args()
+
+    if args.version:
+        print(f"{__version__}")
+        sys.exit(0)
+
+    if sys.argv[1] == "run":
+        sys.exit(main_run(extra_args))
+    elif sys.argv[1] == "startproject":
+        main_scaffold(args)
+    elif sys.argv[1] == "har2case":
+        main_har2case(args)
+    elif sys.argv[1] == "make":
+        main_make(args.testcase_path)
+
+
+def main_hrun_alias():
+    """ command alias
+        hrun = httprunner run
+    """
+    if len(sys.argv) == 2:
+        if sys.argv[1] in ["-V", "--version"]:
+            # hrun -V
+            sys.argv = ["httprunner", "-V"]
+        elif sys.argv[1] in ["-h", "--help"]:
+            pytest.main(["-h"])
+            sys.exit(0)
+        else:
+            # hrun /path/to/testcase
+            sys.argv.insert(1, "run")
+    else:
+        sys.argv.insert(1, "run")
+
+    main()
+
+
+def main_make_alias():
+    """ command alias
+        hmake = httprunner make
+    """
+    sys.argv.insert(1, "make")
+    main()
+
+
+def main_har2case_alias():
+    """ command alias
+        har2case = httprunner har2case
+    """
+    sys.argv.insert(1, "har2case")
+    main()
 
 
 if __name__ == "__main__":
-    """ debugging mode
-    """
-    import sys
-    if len(sys.argv) == 0:
-        exit(0)
-
-    cmd = sys.argv.pop(1)
-
-    if cmd in ["hrun", "httprunner", "ate"]:
-        main_hrun()
-    elif cmd in ["locust", "locusts"]:
-        main_locust()
-    else:
-        from httprunner.logger import color_print
-        color_print("Miss debugging type.", "RED")
-        example = "\n".join([
-            "e.g.",
-            "python main-debug.py hrun /path/to/testcase_file",
-            "python main-debug.py locusts -f /path/to/testcase_file"
-        ])
-        color_print(example, "yellow")
+    main()
