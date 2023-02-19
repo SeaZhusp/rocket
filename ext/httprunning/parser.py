@@ -102,7 +102,8 @@ def parse_step(api, config):
 
     # variables
     __variables: dict = config.get("variables", {})
-    __variables.update(parse_variables(__body.get("variables", [])) if len(__body.get("variables", [])) > 0 else {})
+    __api_variables = parse_variables(__body.get("variables", [])) if len(__body.get("variables", [])) > 0 else {}
+    __api_variables.update(__variables)
 
     # setup_hooks
     setup_hooks = __hooks.get("setup_hooks")
@@ -113,8 +114,9 @@ def parse_step(api, config):
     __url = __service_mapping.get(__service) + api.get("path")
     __method = api.get("method")
     __headers = config.get("headers", {})
-    __headers.update(parse_headers(__body.get("headers", [])) if len(__body.get("headers", [])) > 0 else {})
-    __request = parse_request(__method, __url, __params, __headers, __body.get("request"))
+    __api_headers = parse_headers(__body.get("headers", [])) if len(__body.get("headers", [])) > 0 else {}
+    __api_headers.update(__headers)
+    __request = parse_request(__method, __url, __params, __api_headers, __body.get("request"))
 
     # teardown_hooks
     teardown_hooks = __hooks.get("teardown_hooks")
@@ -130,12 +132,10 @@ def parse_step(api, config):
 
     # todo: validate_script
 
-    __step = {}
-    __step.update(name=__name)
-    __step.update(variables=__variables)
-    __step.update(setup_hooks=__setup_hooks)
-    __step.update(request=__request)
-    __step.update(teardown_hooks=__teardown_hooks)
-    __step.update(extract=__extract)
-    __step.update(validate=__validate)
-    return __step
+    return dict(name=__name,
+                variables=__api_variables,
+                setup_hooks=__setup_hooks,
+                request=__request,
+                teardown_hooks=__teardown_hooks,
+                extract=__extract,
+                validate=__validate)
