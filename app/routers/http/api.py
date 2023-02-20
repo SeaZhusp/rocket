@@ -2,6 +2,7 @@ import json
 
 from fastapi import APIRouter, Depends
 
+from app.core.result import aaa
 from app.curd.http.config import ConfigDao
 from app.utils.utils import Utils
 from app.curd.http.api import ApiDao
@@ -58,3 +59,8 @@ async def run_apis(single_api: SingleApiRunBody):
     http_run = HttpRunning([api.to_dict()], config.to_dict())
     summary = http_run.run_testcase()
     return ResponseDto(data=summary)
+
+
+@router.get("/run/result")
+async def result():
+    return ResponseDto(data=aaa)
