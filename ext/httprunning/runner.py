@@ -7,8 +7,8 @@ from ext.httprunning.parser import parse_variables, parse_step, parse_headers
 
 class HttpRunning(object):
 
-    def __init__(self, api_list, config):
-        self.api_list = api_list
+    def __init__(self, testcases, config):
+        self.testcases = testcases
         self.my_config = config
 
     def __handle_tmp_config(self):
@@ -29,23 +29,25 @@ class HttpRunning(object):
         config["name"] = name
         return config
 
-    def __handle_steps(self, config):
+    def __handle_steps(self, testcase, config):
         steps = []
-        for __api in self.api_list:
+        for __api in testcase:
             self.__handle_tmp_config()
             step = TStep(**parse_step(__api, config))
             steps.append(step)
         return steps
 
-    def __handle_testcase(self):
-        config = self.__handle_tmp_config()
-        test_steps = self.__handle_steps(config)
-        testcase = TestCase(config=TConfig(**config), teststeps=test_steps)
-        return testcase
+    def __handle_testcase(self, testcase, config):
+        test_steps = self.__handle_steps(testcase, config)
+        h_testcase = TestCase(config=TConfig(**config), teststeps=test_steps)
+        return h_testcase
 
     def run_testcase(self):
-        testcase = self.__handle_testcase()
-        runner = HttpRunner()
-        runner.run_testcase(testcase)
-        summary = runner.get_summary()
+        config = self.__handle_tmp_config()
+        summary = []
+        for testcase in self.testcases:
+            h_testcase = self.__handle_testcase(testcase, config)
+            runner = HttpRunner()
+            runner.run_testcase(h_testcase)
+            summary.append(runner.get_summary())
         return summary
