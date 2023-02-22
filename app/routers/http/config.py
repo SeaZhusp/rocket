@@ -18,6 +18,12 @@ async def list_env(search="", page: int = 1, limit: int = 10, user_info=Depends(
     return ListResponseDto(paging=paging, data=envs)
 
 
+@router.get("/all")
+async def list_all_env(user_info=Depends(Permission())):
+    configs = await ConfigDao.list_all()
+    return ResponseDto(data=configs)
+
+
 @router.post("/create")
 async def create_env(env: EnvCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await ConfigDao.create(env)

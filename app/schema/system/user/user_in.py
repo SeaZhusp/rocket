@@ -6,13 +6,12 @@ from app.base.schema import RocketBaseSchema
 from app.core.Enums import DutyEnum, StatusEnum
 from app.utils.crypto import Crypto
 
-from app.utils.utils import StringUtils
 from config import Config
 
 
 class BaseUserBody(RocketBaseSchema):
-    password: str
-    username: str
+    password: str = Field(..., title="密码", max_length=16, description="必传")
+    username: str = Field(..., title="账号", max_length=16, description="必传")
 
 
 class UserCreateBody(BaseUserBody):
@@ -20,20 +19,12 @@ class UserCreateBody(BaseUserBody):
     email: Union[str, None] = Field(default=None, max_length=64)
     phone: Union[str, None] = Field(default=None, max_length=16)
 
-    @validator("username", "password", "fullname")
-    def check_fields(cls, v):
-        return StringUtils.not_empty(v)
-
     @validator("password")
     def password_to_md5(cls, v):
         return Crypto.md5(f"{v}{Config.TOKEN_KEY}")
 
 
 class UserLoginBody(BaseUserBody):
-
-    @validator("username", "password")
-    def name_not_empty(cls, v):
-        return StringUtils.not_empty(v)
 
     @validator("password")
     def password_to_md5(cls, v):

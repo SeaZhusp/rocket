@@ -14,7 +14,7 @@ class ApiCreateBody(RocketBaseSchema):
     service: str = Field(..., title="微服务", description="必传")
     method: str = Field(..., title="请求方式", description="必传")
     path: str = Field(..., title="请求路径", description="必传")
-    times: int = Field(..., title="循环次数", description="必传")
+    # times: int = Field(..., title="循环次数", description="必传")
     body: Body
 
     project_id: int = Field(..., title="项目id", description="必传")
