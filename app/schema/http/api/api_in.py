@@ -19,6 +19,7 @@ class ApiCreateBody(RocketBaseSchema):
 
     project_id: int = Field(..., title="项目id", description="必传")
     catalog_id: int = Field(..., title="目录id", description="必传")
+    config_id: int
     create_user: Union[str, None]
     update_user: Union[str, None]
 

@@ -7,7 +7,7 @@ import time
 from httprunner.exceptions import ParamsError
 
 
-def gen_random_string(str_len):
+def get_random_string(str_len):
     """ generate random string with specified length
     """
     return "".join(

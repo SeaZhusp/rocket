@@ -4,7 +4,7 @@ from app.base.model import RocketBaseModel
 
 
 class Catalog(RocketBaseModel):
-    __tablename__ = "sys_catalog"
+    __tablename__ = "http_catalog"
 
     name = Column(String(32), nullable=False, comment="目录名称")
     parent_id = Column(INT, comment="父级id")
@@ -14,8 +14,3 @@ class Catalog(RocketBaseModel):
     __table_args__ = (
         UniqueConstraint("project_id", "name", "parent_id"),
     )
-
-    def __init__(self, form):
-        self.name = form.name
-        self.parent_id = form.parent_id
-        self.project_id = form.project_id

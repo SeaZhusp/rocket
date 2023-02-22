@@ -1,8 +1,8 @@
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCurd
 from app.curd.http.api import ApiDao
-from app.curd.system.project import ProjectDao
-from app.models.system.catalog import Catalog
+from app.curd.http.project import ProjectDao
+from app.models.http.catalog import Catalog
 
 
 class CatalogDao(BaseCurd):
@@ -17,7 +17,7 @@ class CatalogDao(BaseCurd):
             parent_o = cls.get_with_existed(filter_list=[cls.model.id == catalog.parent_id])
             if not parent_o:
                 raise BusinessException("父级目录不存在")
-        o = Catalog(catalog)
+        o = Catalog(**catalog.dict())
         cls.insert_with_model(model_obj=o)
 
     @classmethod

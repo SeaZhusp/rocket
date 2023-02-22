@@ -55,7 +55,7 @@ def parse_request(method, url, params, headers, req):
     __json_data = req.get("json_data")
 
     def __parse_form_data(__form_data):
-        if __data_type == "json_data":
+        if __data_type == "json":
             form_data = None
         else:
             form_data = parse_variables(__form_data)

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
 from app.core.Enums import DutyEnum
-from app.curd.system.project import ProjectDao
+from app.curd.http.project import ProjectDao
 from app.utils.utils import Utils
-from app.schema.system.project.project_in import ProjectCreateBody, ProjectUpdateBody
+from app.schema.http.project.project_in import ProjectCreateBody, ProjectUpdateBody
 from app.core.Response import ListResponseDto, ResponseDto
 
 router = APIRouter(prefix="/project")
@@ -38,6 +38,6 @@ async def update_project(project: ProjectUpdateBody, user_info=Depends(Permissio
 
 
 @router.get("/all")
-async def list_all_project(project_type: int, user_info=Depends(Permission())):
-    projects = await ProjectDao.list_all(project_type)
+async def list_all_project(user_info=Depends(Permission())):
+    projects = await ProjectDao.list_all()
     return ResponseDto(data=projects)

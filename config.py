@@ -2,8 +2,8 @@ import os
 
 
 class Config(object):
-    # MYSQL_HOST = "172.17.122.101"
-    MYSQL_HOST = "127.0.0.1"
+    MYSQL_HOST = "172.17.122.101"
+    # MYSQL_HOST = "127.0.0.1"
     MYSQL_USER = "root"
     MYSQL_PWD = "123456"
     MYSQL_PORT = 3306
@@ -40,6 +40,8 @@ class FilePath(object):
 
     ROCKET_SERVER = os.path.join(LOG_FILE_PATH, "rocket_server.log")
 
+    # ROCKET_HTTP = os.path.join(LOG_FILE_PATH, "rocket_http.log")
+
     ROCKET_ERROR = os.path.join(LOG_FILE_PATH, "rocket_error.log")
 
 
@@ -62,7 +64,7 @@ LOGGING_CONF = {
         "enqueue": True,
         "backtrace": True,
         "diagnose": True,
-    },
+    }
 }
 
 ROCKET_ENV = os.environ.get("rocket_env", "dev")

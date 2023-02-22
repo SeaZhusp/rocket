@@ -1,7 +1,8 @@
 import json
 
+from ext.httprunning.loader import load_functions
 from httprunner import HttpRunner
-from httprunner.models import TestCase, TConfig, TStep
+from httprunner.models import TestCase, TConfig, TStep, ProjectMeta
 from ext.httprunning.parser import parse_variables, parse_step, parse_headers
 
 
@@ -44,10 +45,11 @@ class HttpRunning(object):
 
     def run_testcase(self):
         config = self.__handle_tmp_config()
+        functions = load_functions()
         summary = []
         for testcase in self.testcases:
             h_testcase = self.__handle_testcase(testcase, config)
-            runner = HttpRunner()
+            runner = HttpRunner().with_project_meta(ProjectMeta(functions=functions))
             runner.run_testcase(h_testcase)
             summary.append(runner.get_summary())
         return summary

@@ -11,5 +11,6 @@ class ApiDto(RocketBaseDto):
     path: str
     project_id: int
     catalog_id: int
+    config_id: int
     create_user: str
     update_user: str

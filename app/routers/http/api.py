@@ -7,7 +7,7 @@ from app.curd.http.config import ConfigDao
 from app.utils.utils import Utils
 from app.curd.http.api import ApiDao
 from app.core.Auth import Permission
-from app.curd.system.catalog import CatalogDao
+from app.curd.http.catalog import CatalogDao
 from app.core.Response import ResponseDto, ListResponseDto
 from app.schema.http.api.api_in import ApiCreateBody, ApiUpdateBody, SingleApiRunBody
 from ext.httprunning import HttpRunning

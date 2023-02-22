@@ -10,12 +10,12 @@ import time
 from httprunner.exceptions import ParamsError
 
 
-def gen_random_string(str_len):
-    """ generate random string with specified length
-    """
-    return "".join(
-        random.choice(string.ascii_letters + string.digits) for _ in range(str_len)
-    )
+# def gen_random_string(str_len):
+#     """ generate random string with specified length
+#     """
+#     return "".join(
+#         random.choice(string.ascii_letters + string.digits) for _ in range(str_len)
+#     )
 
 
 def get_timestamp(str_len=13):

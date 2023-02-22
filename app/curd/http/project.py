@@ -2,7 +2,7 @@ from sqlalchemy.sql.elements import and_
 
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCurd
-from app.models.system.project import Project
+from app.models.http.project import Project
 
 
 class ProjectDao(BaseCurd):
@@ -10,11 +10,10 @@ class ProjectDao(BaseCurd):
 
     @classmethod
     async def create(cls, project):
-        filter_list = [and_(cls.model.name == project.name, cls.model.type == project.type)]
-        ant = cls.get_with_existed(filter_list=filter_list)
+        ant = cls.get_with_existed(name=project.name)
         if ant:
             raise BusinessException("项目已存在")
-        o = Project(project)
+        o = Project(**project.dict())
         return cls.insert_with_model(model_obj=o)
 
     @classmethod
@@ -31,15 +30,15 @@ class ProjectDao(BaseCurd):
 
     @classmethod
     async def update(cls, project):
-        filter_list = [and_(cls.model.name == project.name, cls.model.type == project.type, cls.model.id != project.id)]
+        filter_list = [and_(cls.model.name == project.name, cls.model.id != project.id)]
         ant = cls.get_with_existed(filter_list=filter_list)
         if ant:
             raise BusinessException("项目已存在")
         return cls.update_with_id(model=project)
 
     @classmethod
-    async def list_all(cls, project_type):
-        return cls.get_with_params(type=project_type, _sort=["create_time"])
+    async def list_all(cls):
+        return cls.get_with_params(_sort=["create_time"])
 
     @classmethod
     async def exist_by_id(cls, pk):
