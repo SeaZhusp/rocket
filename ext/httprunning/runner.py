@@ -17,7 +17,6 @@ class HttpRunning(object):
     def __handle_tmp_config(self):
         # todo: parameters,export,path
         config = {}
-        name = self.my_config.get("name")
         __config = json.loads(self.my_config.get("config"))
 
         __variables = __config.get("variables", [])
@@ -29,12 +28,12 @@ class HttpRunning(object):
         config["service"] = {item.get("key"): item.get("value") for item in __config.get("service", [])}
         config["variables"] = variables
         config["headers"] = headers
-        config["name"] = name
         return config
 
     def __handle_steps(self, testcase, config):
         steps = []
         for __api in testcase:
+            config["name"] = __api.get("name")
             self.__handle_tmp_config()
             step = TStep(**parse_step(__api, config))
             steps.append(step)
@@ -52,13 +51,20 @@ class HttpRunning(object):
         functions = load_functions()
         test_results = []
         for testcase in self.testcases:
+            # parse_case_at = time.time()
             h_testcase = self.__handle_testcase(testcase["testcase"], config)
+            # parse_case_use = round(time.time() - parse_case_at, 2)
+            # http_run_at = time.time()
             runner = HttpRunner()\
                 .with_project_meta(ProjectMeta(functions=functions))\
                 .with_case_id(case_id=testcase["case_id"])
             runner.run_testcase(h_testcase)
+            # http_run__use = round(time.time() - parse_case_at, 2)
             test_results.append(runner.get_summary().dict())
+        # gen_summary_at = time.time()
         summary = get_summary(test_results)
         summary["stat"][0]["duration"] = round(time.time() - start_time, 2)
         summary["stat"][0]["start_time"] = start_at
+        # gen_summary_use = round(time.time() - gen_summary_at, 2)
+
         return summary

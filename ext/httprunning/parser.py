@@ -1,6 +1,7 @@
 import json
 
 from ext.httprunning.models import ValueTypeEnum
+from loguru import logger
 
 
 def __format_value(__key, __type, __value):
@@ -62,7 +63,14 @@ def parse_request(method, url, params, headers, req):
         return form_data
 
     __data = __parse_form_data(__form_data)
-    __json = json.loads(__json_data) if __json_data else None
+
+    try:
+        __json = json.loads(__json_data)
+    except Exception as ex:
+        logger.error(
+            f"error parse json_data:{__json_data}\n"
+            f"{type(ex).__name__}:{ex}")
+        __json = {}
 
     __request = {}
     __request.update(method=method)
