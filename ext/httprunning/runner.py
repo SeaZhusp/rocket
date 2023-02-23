@@ -51,8 +51,10 @@ class HttpRunning(object):
         test_results = []
         start_time = time.strftime("%Y-%m-%d %H:%M:%S")
         for testcase in self.testcases:
-            h_testcase = self.__handle_testcase(testcase, config)
-            runner = HttpRunner().with_project_meta(ProjectMeta(functions=functions))
+            h_testcase = self.__handle_testcase(testcase["testcase"], config)
+            runner = HttpRunner()\
+                .with_project_meta(ProjectMeta(functions=functions))\
+                .with_case_id(case_id=testcase["case_id"])
             runner.run_testcase(h_testcase)
             test_results.append(runner.get_summary().dict())
         summary = get_summary(test_results)
