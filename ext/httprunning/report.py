@@ -19,15 +19,10 @@ def get_summary(test_results):
         "platform": get_platform(),
         "details": test_results
     }
-    duration = 0
     for test_result in test_results:
         if test_result["success"]:
             summary["stat"][0]["success"] += 1
         else:
             summary["stat"][0]["failed"] += 1
-
-        duration += test_result["time"]["duration"]
-
         summary["success"] &= test_result["success"]
-    summary["stat"][0]["duration"] = round(duration, 2)
     return summary

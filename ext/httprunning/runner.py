@@ -46,10 +46,11 @@ class HttpRunning(object):
         return h_testcase
 
     def run_testcase(self):
+        start_at = time.strftime("%Y-%m-%d %H:%M:%S")
+        start_time = time.time()
         config = self.__handle_tmp_config()
         functions = load_functions()
         test_results = []
-        start_time = time.strftime("%Y-%m-%d %H:%M:%S")
         for testcase in self.testcases:
             h_testcase = self.__handle_testcase(testcase["testcase"], config)
             runner = HttpRunner()\
@@ -58,5 +59,6 @@ class HttpRunning(object):
             runner.run_testcase(h_testcase)
             test_results.append(runner.get_summary().dict())
         summary = get_summary(test_results)
-        summary["stat"][0]["start_time"] = start_time
+        summary["stat"][0]["duration"] = round(time.time() - start_time, 2)
+        summary["stat"][0]["start_time"] = start_at
         return summary
