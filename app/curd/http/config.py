@@ -21,8 +21,8 @@ class ConfigDao(BaseCurd):
                                        name=f"%{search}%" if search else None)
 
     @classmethod
-    async def list_all(cls):
-        return cls.get_with_params(_sort=["create_time"])
+    async def list_all_enable(cls):
+        return cls.get_with_params(status=1, _sort=["create_time"])
 
     @classmethod
     async def delete(cls, pk):

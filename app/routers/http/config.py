@@ -4,7 +4,7 @@ from app.core.Auth import Permission
 from app.core.Enums import DutyEnum
 from app.core.Response import ResponseDto, ListResponseDto
 from app.curd.http.config import ConfigDao
-from app.schema.http.config.config_in import EnvCreateBody, EnvUpdateBody
+from app.schema.http.config.config_in import ConfigCreateBody, EnvUpdateBody
 from app.utils.utils import Utils
 
 router = APIRouter(prefix="/config")
@@ -19,13 +19,13 @@ async def list_env(search="", page: int = 1, limit: int = 10, user_info=Depends(
 
 
 @router.get("/all")
-async def list_all_env(user_info=Depends(Permission())):
-    configs = await ConfigDao.list_all()
+async def list_all_enable_env(user_info=Depends(Permission())):
+    configs = await ConfigDao.list_all_enable()
     return ResponseDto(data=configs)
 
 
 @router.post("/create")
-async def create_env(env: EnvCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
+async def create_env(env: ConfigCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
     await ConfigDao.create(env)
     return ResponseDto(msg="创建成功")
 

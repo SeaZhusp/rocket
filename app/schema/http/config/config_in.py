@@ -1,14 +1,15 @@
 import json
-from typing import Union
+from typing import Union, List
 
 from pydantic import Field, validator
 
 from app.base.schema import RocketBaseSchema, EnvConfig
 
 
-class EnvCreateBody(RocketBaseSchema):
+class ConfigCreateBody(RocketBaseSchema):
     name: str = Field(..., title="环境名称", description="必传")
     status: int = Field(..., title="状态", description="必传")
+    modules: Union[List[str], None]
     desc: Union[str, None]
     config: EnvConfig
 
@@ -16,6 +17,10 @@ class EnvCreateBody(RocketBaseSchema):
     def config_to_str(cls, v):
         return json.dumps(v.dict())
 
+    @validator("modules")
+    def modules_to_str(cls, v):
+        return json.dumps(v)
 
-class EnvUpdateBody(EnvCreateBody):
+
+class EnvUpdateBody(ConfigCreateBody):
     id: int = Field(..., title="环境id", description="必传")
