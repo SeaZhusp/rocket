@@ -6,7 +6,7 @@ from pydantic import Field, validator
 from app.base.schema import RocketBaseSchema, EnvConfig
 
 
-class ConfigCreateBody(RocketBaseSchema):
+class EnvConfigCreateBody(RocketBaseSchema):
     name: str = Field(..., title="环境名称", description="必传")
     status: int = Field(..., title="状态", description="必传")
     modules: Union[List[str], None]
@@ -22,5 +22,5 @@ class ConfigCreateBody(RocketBaseSchema):
         return json.dumps(v)
 
 
-class EnvUpdateBody(ConfigCreateBody):
+class EnvConfigUpdateBody(EnvConfigCreateBody):
     id: int = Field(..., title="环境id", description="必传")

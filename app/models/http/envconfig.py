@@ -3,8 +3,8 @@ from sqlalchemy import Column, String, INT, TEXT
 from app.base.model import RocketBaseModel
 
 
-class Config(RocketBaseModel):
-    __tablename__ = "http_config"
+class EnvConfig(RocketBaseModel):
+    __tablename__ = "http_envconfig"
 
     name = Column(String(128), nullable=False, comment="环境名")
     status = Column(INT, default=1, comment="状态 1：启用 2：禁用")

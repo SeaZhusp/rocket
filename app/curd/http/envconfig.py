@@ -1,10 +1,10 @@
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCurd
-from app.models.http.config import Config
+from app.models.http.envconfig import EnvConfig
 
 
-class ConfigDao(BaseCurd):
-    model = Config
+class EnvConfigDao(BaseCurd):
+    model = EnvConfig
 
     @classmethod
     async def create(cls, env):
@@ -12,7 +12,7 @@ class ConfigDao(BaseCurd):
         ant = cls.get_with_existed(filter_list=filter_list)
         if ant:
             raise BusinessException("环境已存在")
-        o = Config(**env.dict())
+        o = EnvConfig(**env.dict())
         return cls.insert_with_model(model_obj=o)
 
     @classmethod

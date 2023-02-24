@@ -2,7 +2,7 @@ import json
 
 from fastapi import APIRouter, Depends
 
-from app.curd.http.config import ConfigDao
+from app.curd.http.envconfig import EnvConfigDao
 from app.utils.utils import Utils
 from app.curd.http.api import ApiDao
 from app.core.Auth import Permission
@@ -54,7 +54,7 @@ async def update_api(api: ApiUpdateBody, user_info=Depends(Permission())):
 @router.post("/run")
 async def run_apis(single_api: SingleApiRunBody, user_info=Depends(Permission())):
     api = await ApiDao.get_detail_with_id(pk=single_api.api_id)
-    config = await ConfigDao.get_detail_with_id(pk=single_api.config_id)
+    config = await EnvConfigDao.get_detail_with_id(pk=single_api.config_id)
     http_run = HttpRunning([{"case_id": api.id, "testcase": [api.to_dict()]}], config.to_dict())
     summary = http_run.run_testcase()
     return ResponseDto(data=summary)
