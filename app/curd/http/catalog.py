@@ -53,7 +53,7 @@ class CatalogDao(BaseCurd):
         ant = cls.get_with_existed(parent_id=pk)
         if ant:
             raise BusinessException("存在子目录，不能删除")
-        api_ant = ApiDao.exist_by_catalog_id(pk)
+        api_ant = await ApiDao.exist_by_catalog_id(pk)
         if api_ant:
             raise BusinessException("目录下存在接口，不能删除")
         return cls.delete_with_id(pk=pk)

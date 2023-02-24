@@ -24,7 +24,7 @@ def get_summary(test_results):
             "start_time": ""
         },
         "platform": get_platform(),
-        "details": []
+        "details": test_results
     }
     for test_result in test_results:
         if test_result["success"]:
@@ -32,7 +32,4 @@ def get_summary(test_results):
         else:
             summary["stat"][0]["failed"] += 1
         summary["success"] &= test_result["success"]
-        config_vars = test_result["in_out"].pop("config_vars")
-        test_result["in_out"]["variables_list"] = __get_variables_to_list(config_vars)
-        summary["details"].append(test_result)
     return summary
