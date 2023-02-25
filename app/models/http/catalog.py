@@ -7,6 +7,7 @@ class Catalog(RocketBaseModel):
     __tablename__ = "http_catalog"
 
     name = Column(String(32), nullable=False, comment="目录名称")
+    used = Column(INT, nullable=False, comment="目录用于 1:api 2:testcase")
     parent_id = Column(INT, comment="父级id")
     project_id = Column(INT, nullable=False, comment="项目id")
 

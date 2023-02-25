@@ -21,19 +21,20 @@ class CatalogDao(BaseCurd):
         cls.insert_with_model(model_obj=o)
 
     @classmethod
-    async def list(cls, project_id):
-        return cls.get_with_params(filter_list=[cls.model.project_id == project_id])
+    async def list(cls, used, project_id):
+        return cls.get_with_params(project_id=project_id, used=used)
 
     @classmethod
-    async def get_catalog_tree(cls, project_id):
+    async def get_catalog_tree(cls, used, project_id):
         tree = list()
         source = list()
         tree_dict = dict()
-        catalogs = cls.get_with_params(filter_list=[cls.model.project_id == project_id], _sort=["create_time"],
+        catalogs = cls.get_with_params(used=used, project_id=project_id, _sort=["create_time"],
                                        _sort_type="asc")
         for catalog in catalogs:
             source.append(dict(label=catalog.name,
                                id=catalog.id,
+                               used=catalog.used,
                                parent_id=catalog.parent_id,
                                project_id=catalog.project_id,
                                children=list()))

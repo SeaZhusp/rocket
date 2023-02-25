@@ -6,7 +6,7 @@ from app.core.Response import ListResponseDto, ResponseDto
 from app.curd.system.dictionary import DictDao, DictItemDao
 from app.schema.system.dictionary.dictionary_in import DictCreateBody, DictUpdateBody, DictItemCreateBody, \
     DictItemUpdateBody
-from app.utils.utils import get_total_page
+from app.utils.utils import ComputerUtils
 
 router = APIRouter(prefix="/dict")
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/dict")
 async def list_dictionary(page: int = 1, limit: int = 10, search: str = None,
                           user_info=Depends(Permission(DutyEnum.admin))):
     total, dicts = await DictDao.list(page=page, limit=limit, search=search)
-    total_page = get_total_page(total, limit)
+    total_page = ComputerUtils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=dicts)
 

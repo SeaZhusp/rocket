@@ -2,9 +2,24 @@ import ast
 import math
 import re
 
+from app.core.Response import ResponseDto
 
-def get_total_page(total: int, size: int) -> int:
-    return math.ceil(total / size)
+
+class StringUtils(object):
+    @staticmethod
+    def not_empty(v):
+        if isinstance(v, str) and len(v.strip()) == 0:
+            raise ValueError("不能为空")
+        if not isinstance(v, int):
+            if not v:
+                raise ValueError("不能为空")
+        return v
+
+
+class ComputerUtils(object):
+    @staticmethod
+    def get_total_page(total: int, size: int) -> int:
+        return math.ceil(total / size)
 
 
 def get_function_from_content(module_content):
@@ -61,14 +76,13 @@ def parse_function_meta(function_express):
         {'func_name': 'func', 'args': [1, 2], 'kwargs': {'a':3, 'b':4}}
 
     """
-    function_regexp_compile = re.compile(r"^([\w_]+)\(([\$\w\.\-/_ =,]*)\)$")
+    function_regexp_compile = re.compile(r"^([\w_]+)\(([\$\w\.\-/_ =,\"\']*)\)$")
     matched = function_regexp_compile.match(function_express)
     function_meta = {
         "func_name": matched.group(1),
         "args": [],
         "kwargs": {}
     }
-
     args_str = matched.group(2).strip()
     if args_str == "":
         return function_meta
@@ -82,4 +96,5 @@ def parse_function_meta(function_express):
         else:
             function_meta["args"].append(parse_string_value(arg))
 
+    print(function_meta)
     return function_meta

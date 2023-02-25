@@ -15,14 +15,14 @@ async def create_catalog(catalog: CatalogCreateBody, user_info=Depends(Permissio
 
 
 @router.get("/list")
-async def list_catalog(project_id: int, user_info=Depends(Permission())):
-    catalogs = await CatalogDao.list(project_id)
+async def list_catalog(used: str, project_id: int, user_info=Depends(Permission())):
+    catalogs = await CatalogDao.list(used, project_id)
     return ResponseDto(data=catalogs)
 
 
 @router.get("/tree")
-async def get_catalog_tree(project_id: int, user_info=Depends(Permission())):
-    catalog_tree = await CatalogDao.get_catalog_tree(project_id)
+async def get_catalog_tree(used: str, project_id: int, user_info=Depends(Permission())):
+    catalog_tree = await CatalogDao.get_catalog_tree(used, project_id)
     return ResponseDto(data=catalog_tree)
 
 

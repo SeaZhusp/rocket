@@ -9,8 +9,9 @@ router_list = [
     Router(module=dictionary.router, prefix="/sys", tags=["字典管理"]),
     Router(module=file.router, prefix="/sys", tags=["文件管理"]),
 
-    Router(module=catalog.router, prefix="/http", tags=["目录管理"]),
     Router(module=project.router, prefix="/http", tags=["项目管理"]),
+    Router(module=catalog.router, prefix="/http", tags=["目录管理"]),
+    Router(module=envconfig.router, prefix="/http", tags=["环境管理"]),
     Router(module=pyshell.router, prefix="/http", tags=["Pyshell"]),
     Router(module=api.router, prefix="/http", tags=["接口测试"]),
 

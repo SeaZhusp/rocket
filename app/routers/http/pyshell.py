@@ -5,9 +5,10 @@ import types
 
 from fastapi import APIRouter, Depends
 
+from app.core.Enums import DutyEnum
 from app.core.Response import ResponseDto
 from app.core.Auth import Permission
-from app.schema.http.pyshell.pyshell_in import DebugFunctionBody
+from app.schema.http.pyshell.pyshell_in import DebugFunctionBody, CreatePyshellBody, SavePyshellBody
 from app.utils.utils import get_function_from_content, parse_function_meta
 
 router = APIRouter(prefix="/pyshell")
@@ -44,7 +45,45 @@ async def debug_function(debug_functions: DebugFunctionBody, user_info=Depends(P
         module_functions_dict = {name: item for name, item in vars(func_list).items() if
                                  isinstance(item, types.FunctionType)}
         function_meta = parse_function_meta(func_express)
-        return ResponseDto(data=module_functions_dict[function_meta["func_name"]](*function_meta["args"]))
+        result = module_functions_dict[function_meta["func_name"]](*function_meta["args"])
+        return ResponseDto(msg="执行成功", data=result)
     except:
         error_data = "\n".join("{}".format(traceback.format_exc()).split("↵"))
         return ResponseDto(msg="语法错误，请自行检查", data=error_data)
+
+
+@router.post("/create")
+async def create_pyshell(pyshell: CreatePyshellBody, user_info=Depends(Permission())):
+    module_name = pyshell.module_name
+    if module_name.find(".py") == -1:
+        return ResponseDto(msg="请创建正确格式的py文件")
+    module = os.path.join(pyshell_path, module_name)
+    if os.path.exists(module):
+        return ResponseDto(msg="pyshell已存在")
+    with open(module, "w", encoding="utf8") as f:
+        pass
+    return ResponseDto(msg="创建成功")
+
+
+@router.put("/save")
+async def save_pyshell(pyshell_meta: SavePyshellBody, user_info=Depends(Permission())):
+    content = pyshell_meta.content
+    module_name = pyshell_meta.module_name
+    module = os.path.join(pyshell_path, module_name)
+    if not os.path.exists(module):
+        return ResponseDto(msg=f"{module_name}不存在")
+    with open(module, 'w', encoding='utf8') as f:
+        f.write(content)
+    return ResponseDto(msg="保存成功")
+
+
+@router.delete("/delete")
+async def delete_pyshell(pyshell: CreatePyshellBody, user_info=Depends(Permission(DutyEnum.admin))):
+    module_name = pyshell.module_name
+    module = os.path.join(pyshell_path, module_name)
+    if module_name == "rocket.py":
+        return ResponseDto(msg=f"{module_name}不允许删除")
+    if not os.path.exists(module):
+        return ResponseDto(msg=f"{module_name}不存在")
+    os.remove(module)
+    return ResponseDto(msg="删除成功")

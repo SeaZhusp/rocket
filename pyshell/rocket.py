@@ -55,6 +55,8 @@ def get_now_plus_time(unit, number):
         return (datetime.datetime.now() + datetime.timedelta(minutes=number)).strftime(fmt)
     elif unit == "seconds":
         return (datetime.datetime.now() + datetime.timedelta(seconds=number)).strftime(fmt)
+    else:
+        return "unit must in [days, hours, minutes, seconds]"
 
 
 def get_now_reduce_time(unit, number):
@@ -69,6 +71,8 @@ def get_now_reduce_time(unit, number):
         return (datetime.datetime.now() - datetime.timedelta(minutes=number)).strftime(fmt)
     elif unit == "seconds":
         return (datetime.datetime.now() - datetime.timedelta(seconds=number)).strftime(fmt)
+    else:
+        return "unit must in [days, hours, minutes, seconds]"
 
 
 def get_base64_encode(variable):
