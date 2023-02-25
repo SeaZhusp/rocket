@@ -5,7 +5,7 @@ from app.core.Enums import DutyEnum
 from app.core.Response import ResponseDto, ListResponseDto
 from app.curd.http.envconfig import EnvConfigDao
 from app.schema.http.config.envconfig_in import EnvConfigCreateBody, EnvConfigUpdateBody
-from app.utils.utils import Utils
+from app.utils.utils import get_total_page
 
 router = APIRouter(prefix="/envconfig")
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/envconfig")
 @router.get("/list")
 async def list_env(search="", page: int = 1, limit: int = 10, user_info=Depends(Permission())):
     total, envs = await EnvConfigDao.list(search, page, limit)
-    total_page = Utils.get_total_page(total, limit)
+    total_page = get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=envs)
 

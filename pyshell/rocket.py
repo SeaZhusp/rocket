@@ -37,15 +37,16 @@ def get_random_number(a, b):
     raise ParamsError("a or b type can only int.")
 
 
-def get_current_time(fmt="%Y-%m-%d %H:%M:%S"):
+def get_current_time():
     """get current date, default format is %Y-%m-%d %H:%M:%S
     """
-    return time.strftime(fmt)
+    return time.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def get_now_plus_time(unit, number, fmt="%Y-%m-%d %H:%M:%S"):
+def get_now_plus_time(unit, number):
     """compute time: now add some time, support: days, hours, minutes, seconds
     """
+    fmt = "%Y-%m-%d %H:%M:%S"
     if unit == "days":
         return (datetime.datetime.now() + datetime.timedelta(days=number)).strftime(fmt)
     elif unit == "hours":
@@ -56,9 +57,10 @@ def get_now_plus_time(unit, number, fmt="%Y-%m-%d %H:%M:%S"):
         return (datetime.datetime.now() + datetime.timedelta(seconds=number)).strftime(fmt)
 
 
-def get_now_reduce_time(unit, number, fmt="%Y-%m-%d %H:%M:%S"):
+def get_now_reduce_time(unit, number):
     """compute time: now reduce some time, support: days, hours, minutes, seconds
     """
+    fmt = "%Y-%m-%d %H:%M:%S"
     if unit == "days":
         return (datetime.datetime.now() - datetime.timedelta(days=number)).strftime(fmt)
     elif unit == "hours":

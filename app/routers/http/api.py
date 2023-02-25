@@ -3,7 +3,7 @@ import json
 from fastapi import APIRouter, Depends
 
 from app.curd.http.envconfig import EnvConfigDao
-from app.utils.utils import Utils
+from app.utils.utils import get_total_page
 from app.curd.http.api import ApiDao
 from app.core.Auth import Permission
 from app.curd.http.catalog import CatalogDao
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api")
 async def list_api(project_id: int, catalog_id="", status="", level="", search="", page: int = 1,
                    limit: int = 10, user_info=Depends(Permission())):
     total, apis = await ApiDao.list(project_id, catalog_id, status, level, search, page, limit)
-    total_page = Utils.get_total_page(total, limit)
+    total_page = get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=apis)
 

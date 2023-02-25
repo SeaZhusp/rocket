@@ -7,7 +7,7 @@ from app.core.Enums import DutyEnum
 from app.curd.system.dictionary import DictDao
 from app.curd.system.user import UserDao
 from app.core.TokenAuth import UserToken
-from app.utils.utils import Utils
+from app.utils.utils import get_total_page
 from app.schema.system.user.user_in import UserCreateBody, UserLoginBody, UserUpdateBody
 from app.core.Response import ListResponseDto, ResponseDto
 from app.schema.system.user.user_out import UserDto
@@ -37,7 +37,7 @@ async def login(login_user: UserLoginBody):
 @router.get("/list")
 async def list_user(page: int = 1, limit: int = 10, search: str = None, user_info=Depends(Permission())):
     total, users = await UserDao.list(page=page, limit=limit, search=search)
-    total_page = Utils.get_total_page(total, limit)
+    total_page = get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=users)
 

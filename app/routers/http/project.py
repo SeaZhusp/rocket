@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.core.Auth import Permission
 from app.core.Enums import DutyEnum
 from app.curd.http.project import ProjectDao
-from app.utils.utils import Utils
+from app.utils.utils import get_total_page
 from app.schema.http.project.project_in import ProjectCreateBody, ProjectUpdateBody
 from app.core.Response import ListResponseDto, ResponseDto
 
@@ -20,7 +20,7 @@ async def create_project(project: ProjectCreateBody, user_info=Depends(Permissio
 async def list_project(page: int = 1, limit: int = 10, search: str = None,
                        user_info=Depends(Permission(DutyEnum.admin))):
     total, projects = await ProjectDao.list(page=page, limit=limit, search=search)
-    total_page = Utils.get_total_page(total, limit)
+    total_page = get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=projects)
 

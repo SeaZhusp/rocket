@@ -20,7 +20,7 @@ def load_functions(func_file_list=None):
     func_file_list.extend(builtin)
     for func_file in func_file_list:
         try:
-            imported_module = importlib.import_module("pyshell.{}".format(func_file.replace('.py', '')))
+            imported_module = importlib.import_module("pyshell.{}".format(func_file.replace(".py", "")))
         except Exception as ex:
             raise f"error occurred in {func_file}: {ex}"
         imported_module = importlib.reload(imported_module)
