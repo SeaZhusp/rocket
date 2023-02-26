@@ -61,19 +61,19 @@ def parse_function_meta(function_express):
 
     Examples:
         >>> parse_function("func()")
-        {'func_name': 'func', 'args': [], 'kwargs': {}}
+        {"func_name": "func", "args": [], "kwargs": {}}
 
         >>> parse_function("func(5)")
-        {'func_name': 'func', 'args': [5], 'kwargs': {}}
+        {"func_name": "func", "args": [5], "kwargs": {}}
 
         >>> parse_function("func(1, 2)")
-        {'func_name': 'func', 'args': [1, 2], 'kwargs': {}}
+        {"func_name": "func", "args": [1, 2], "kwargs": {}}
 
         >>> parse_function("func(a=1, b=2)")
-        {'func_name': 'func', 'args': [], 'kwargs': {'a': 1, 'b': 2}}
+        {"func_name": "func", "args": [], "kwargs": {"a": 1, "b": 2}}
 
         >>> parse_function("func(1, 2, a=3, b=4)")
-        {'func_name': 'func', 'args': [1, 2], 'kwargs': {'a':3, 'b':4}}
+        {"func_name": "func", "args": [1, 2], "kwargs": {"a":3, "b":4}}
 
     """
     function_regexp_compile = re.compile(r"^([\w_]+)\(([\$\w\.\-/_ =,\"\']*)\)$")
@@ -87,11 +87,11 @@ def parse_function_meta(function_express):
     if args_str == "":
         return function_meta
 
-    args_list = args_str.split(',')
+    args_list = args_str.split(",")
     for arg in args_list:
         arg = arg.strip()
-        if '=' in arg:
-            key, value = arg.split('=')
+        if "=" in arg:
+            key, value = arg.split("=")
             function_meta["kwargs"][key.strip()] = parse_string_value(value.strip())
         else:
             function_meta["args"].append(parse_string_value(arg))
