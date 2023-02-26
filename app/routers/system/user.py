@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
 from app.core.Enums import DutyEnum
+from app.curd.manage.project import ProjectDao
 from app.curd.system.dictionary import DictDao
 from app.curd.system.user import UserDao
 from app.core.TokenAuth import UserToken
@@ -31,7 +32,8 @@ async def login(login_user: UserLoginBody):
     user_json: str = user_dto.json()
     token = UserToken.generate_token(json.loads(user_json))
     dicts = await DictDao.all_dict_items()
-    return ResponseDto(data=dict(userInfo=user, token=token, dicts=dicts), msg="登录成功")
+    projects = await ProjectDao.list_all()
+    return ResponseDto(data=dict(userInfo=user, token=token, dicts=dicts, projects=projects), msg="登录成功")
 
 
 @router.get("/list")

@@ -2,7 +2,7 @@ from sqlalchemy.sql.elements import and_
 
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCurd
-from app.models.http.project import Project
+from app.models.manage.project import Project
 
 
 class ProjectDao(BaseCurd):

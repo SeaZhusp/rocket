@@ -1,7 +1,7 @@
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCurd
 from app.curd.http.api import ApiDao
-from app.curd.http.project import ProjectDao
+from app.curd.manage.project import ProjectDao
 from app.models.http.catalog import Catalog
 
 

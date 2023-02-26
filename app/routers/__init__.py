@@ -1,5 +1,6 @@
 from app.routers.system import user, dictionary, file
-from app.routers.http import api, envconfig, catalog, project, pyshell
+from app.routers.http import api, envconfig, catalog, pyshell
+from app.routers.manage import project
 from collections import namedtuple
 
 Router = namedtuple("router", ["module", "prefix", "tags"])
@@ -9,7 +10,8 @@ router_list = [
     Router(module=dictionary.router, prefix="/sys", tags=["字典管理"]),
     Router(module=file.router, prefix="/sys", tags=["文件管理"]),
 
-    Router(module=project.router, prefix="/http", tags=["项目管理"]),
+    Router(module=project.router, prefix="/manage", tags=["项目管理"]),
+
     Router(module=catalog.router, prefix="/http", tags=["目录管理"]),
     Router(module=envconfig.router, prefix="/http", tags=["环境管理"]),
     Router(module=pyshell.router, prefix="/http", tags=["Pyshell"]),

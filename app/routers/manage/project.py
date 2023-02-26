@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
 from app.core.Enums import DutyEnum
-from app.curd.http.project import ProjectDao
+from app.curd.manage.project import ProjectDao
 from app.utils.utils import ComputerUtils
 from app.schema.http.project.project_in import ProjectCreateBody, ProjectUpdateBody
 from app.core.Response import ListResponseDto, ResponseDto
