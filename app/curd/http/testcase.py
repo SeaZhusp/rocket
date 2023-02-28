@@ -1,0 +1,21 @@
+from app.base.curd import BaseCurd
+from app.models.http.testcase import Testcase
+
+
+class TestcaseDao(BaseCurd):
+    model = Testcase
+
+    @classmethod
+    async def list(cls, project_id: int, catalog_id="", status="", level="", search="", page: int = 1, limit: int = 10):
+        kwargs = {}
+        if status != "":
+            kwargs.update(status=status)
+        if level != "":
+            kwargs.update(level=level)
+        if catalog_id != "":
+            kwargs.update(catalog_id=catalog_id)
+        if search != "":
+            kwargs.update(name=f"%{search}%")
+        total, testcases = cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"], project_id=project_id,
+                                                   **kwargs)
+        return total, testcases

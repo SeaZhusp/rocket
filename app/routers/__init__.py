@@ -1,5 +1,5 @@
 from app.routers.system import user, dictionary, file
-from app.routers.http import api, envconfig, catalog, pyshell
+from app.routers.http import api, envconfig, catalog, pyshell, testcase
 from app.routers.manage import project
 from collections import namedtuple
 
@@ -16,5 +16,6 @@ router_list = [
     Router(module=envconfig.router, prefix="/http", tags=["环境管理"]),
     Router(module=pyshell.router, prefix="/http", tags=["Pyshell"]),
     Router(module=api.router, prefix="/http", tags=["接口测试"]),
+    Router(module=testcase.router, prefix="/http", tags=["测试用例"]),
 
 ]
