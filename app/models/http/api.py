@@ -18,4 +18,4 @@ class Api(RocketBaseModel):
     project_id = Column(INT, nullable=False, comment="项目id")
     create_user = Column(String(16), nullable=False, comment="创建人")
     update_user = Column(String(16), nullable=False, comment="修改人")
-    config_id = Column(INT, comment="环境id")
+    env_id = Column(INT, comment="环境id")

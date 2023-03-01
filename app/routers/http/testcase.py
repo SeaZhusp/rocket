@@ -1,8 +1,12 @@
+import json
+
 from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
-from app.core.Response import ListResponseDto
+from app.core.Response import ListResponseDto, ResponseDto
+from app.curd.http.catalog import CatalogDao
 from app.curd.http.testcase import TestcaseDao
+from app.schema.http.testcase.testcase_in import TestcaseCreateBody, TestcaseUpdateBody
 from app.utils.utils import ComputerUtils
 
 router = APIRouter(prefix="/testcase")
@@ -15,3 +19,17 @@ async def list_testcase(project_id: int, catalog_id="", status="", level="", sea
     total_page = ComputerUtils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=testcases)
+
+
+@router.post("/create")
+async def create_testcase(testcase: TestcaseCreateBody, user_info=Depends(Permission())):
+    fullname = user_info.get("fullname", "系统")
+    await TestcaseDao.create(testcase, fullname)
+    return ResponseDto(msg="创建成功")
+
+
+@router.put("/update")
+async def update_api(testcase: TestcaseUpdateBody, user_info=Depends(Permission())):
+    fullname = user_info.get("fullname", "系统")
+    await TestcaseDao.update(testcase, fullname)
+    return ResponseDto(msg="更新成功")

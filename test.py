@@ -1,27 +1,4 @@
-# import math
-#
-# a = [10, 10.001, 10.49999, 10.5, 10.5001, 10.777777, 10.9999]
-# result1 = []
-# result2 = []
-# result3 = []
-#
-# for i in a:
-#     result1.append(int(i))  # int 去尾法 及舍掉小数位
-#     result2.append(round(i))  # round 四舍五入
-#     result3.append(math.ceil(i))  # math.ceil 进一法 加一取整
-#
-# print("去尾法的结果是： ", result1)
-# print("四舍五入的结果是： ", result2)
-# print("进一法的结果是： ", result3)
-#
-# a = {"a": 1}
-# a.update(b=1)
-# print(a)
-#
-# a = bool("True")
-# print(type(a))
+import json
+a= [{"id":1,"name":"获取用户列表1","path":"/users/admin/search?targetOrgId=","method":"POST","status":1,"index":1},{"id":2,"name":"获取用户列表2","path":"/users/admin/search?targetOrgId=","method":"POST","status":1,"index":2}]
 
-a = {"a": 100}
-b = {"a": 200, "b": 1}
-b.update(a)
-print(a)
+print(json.dumps(a))

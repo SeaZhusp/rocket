@@ -19,7 +19,7 @@ class ApiCreateBody(RocketBaseSchema):
 
     project_id: int = Field(..., title="项目id", description="必传")
     catalog_id: int = Field(..., title="目录id", description="必传")
-    config_id: int
+    env_id: int
     create_user: Union[str, None]
     update_user: Union[str, None]
 
@@ -34,4 +34,4 @@ class ApiUpdateBody(ApiCreateBody):
 
 class SingleApiRunBody(RocketBaseSchema):
     api_id: int
-    config_id: int
+    env_id: int

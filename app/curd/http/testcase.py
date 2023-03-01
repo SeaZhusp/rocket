@@ -19,3 +19,15 @@ class TestcaseDao(BaseCurd):
         total, testcases = cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"], project_id=project_id,
                                                    **kwargs)
         return total, testcases
+
+    @classmethod
+    async def create(cls, testcase, create_user):
+        testcase.create_user = create_user
+        testcase.update_user = create_user
+        o = Testcase(**testcase.dict())
+        cls.insert_with_model(model_obj=o)
+
+    @classmethod
+    async def update(cls, testcase, update_user):
+        testcase.update_user = update_user
+        return cls.update_with_id(model=testcase)

@@ -81,3 +81,16 @@ class EnvConfig(RocketBaseSchema):
     headers: Union[List[Header], None] = None
     hooks: Union[Hooks, None] = None
     service: Union[List[Service], None] = None
+
+
+class Step(RocketBaseSchema):
+    id: int
+    name: str
+    path: str
+    index: int
+    method: str
+    status: int
+
+
+class TestcaseBody(RocketBaseSchema):
+    steps: Union[List[Step], None] = None
