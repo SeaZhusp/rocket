@@ -35,3 +35,7 @@ class TestcaseDao(BaseCurd):
     @classmethod
     async def delete(cls, pk: int):
         cls.delete_with_id(pk=pk)
+
+    @classmethod
+    async def get_detail_with_id(cls, pk: int):
+        return cls.get_with_id(pk=pk)

@@ -31,3 +31,7 @@ class TestcaseCreateBody(RocketBaseSchema):
 
 class TestcaseUpdateBody(TestcaseCreateBody):
     id: int = Field(..., title="接口id", description="必传")
+
+
+class TestcaseRunBody(RocketBaseSchema):
+    id: int

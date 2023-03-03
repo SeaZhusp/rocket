@@ -4,9 +4,12 @@ from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
 from app.core.Response import ListResponseDto, ResponseDto
+from app.curd.http.api import ApiDao
+from app.curd.http.envconfig import EnvConfigDao
 from app.curd.http.testcase import TestcaseDao
-from app.schema.http.testcase.testcase_in import TestcaseCreateBody, TestcaseUpdateBody
+from app.schema.http.testcase.testcase_in import TestcaseCreateBody, TestcaseUpdateBody, TestcaseRunBody
 from app.utils.utils import ComputerUtils
+from ext.httprunning import HttpRunning
 
 router = APIRouter(prefix="/testcase")
 
@@ -38,3 +41,19 @@ async def update_api(testcase: TestcaseUpdateBody, user_info=Depends(Permission(
 async def delete_testcase(pk: int, user_info=Depends(Permission())):
     await TestcaseDao.delete(pk=pk)
     return ResponseDto(msg="删除成功")
+
+
+@router.post("/run")
+async def run_testcase(case: TestcaseRunBody):
+    case = await TestcaseDao.get_detail_with_id(pk=case.id)
+    steps = json.loads(case.body).get("steps")
+    apis = []
+    for step in steps:
+        if step.get("status") != 1:
+            continue
+        api = await ApiDao.get_detail_with_id(step.get("id"))
+        apis.append(api.to_dict())
+    config = await EnvConfigDao.get_detail_with_id(pk=case.env_id)
+    http_run = HttpRunning([{"case_id": case.id, "testcase": apis}], config.to_dict())
+    summary = http_run.run_testcase()
+    return ResponseDto(data=summary)
