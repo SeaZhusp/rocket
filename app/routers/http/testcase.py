@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
 from app.core.Response import ListResponseDto, ResponseDto
-from app.curd.http.catalog import CatalogDao
 from app.curd.http.testcase import TestcaseDao
 from app.schema.http.testcase.testcase_in import TestcaseCreateBody, TestcaseUpdateBody
 from app.utils.utils import ComputerUtils
@@ -33,3 +32,9 @@ async def update_api(testcase: TestcaseUpdateBody, user_info=Depends(Permission(
     fullname = user_info.get("fullname", "系统")
     await TestcaseDao.update(testcase, fullname)
     return ResponseDto(msg="更新成功")
+
+
+@router.delete("/delete/{pk}")
+async def delete_testcase(pk: int, user_info=Depends(Permission())):
+    await TestcaseDao.delete(pk=pk)
+    return ResponseDto(msg="删除成功")

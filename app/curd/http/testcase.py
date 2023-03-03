@@ -31,3 +31,7 @@ class TestcaseDao(BaseCurd):
     async def update(cls, testcase, update_user):
         testcase.update_user = update_user
         return cls.update_with_id(model=testcase)
+
+    @classmethod
+    async def delete(cls, pk: int):
+        cls.delete_with_id(pk=pk)
