@@ -11,7 +11,9 @@ def __get_variables_to_list(config_vars):
 def get_summary(test_results):
     summary = {
         "success": True,
+        "test_success": True,
         "stat": [{
+            "test_success": True,
             "total": len(test_results),
             "success": 0,
             "failed": 0,
@@ -27,9 +29,11 @@ def get_summary(test_results):
         "details": test_results
     }
     for test_result in test_results:
-        if test_result["success"]:
+        if test_result["test_success"]:
             summary["stat"][0]["success"] += 1
         else:
             summary["stat"][0]["failed"] += 1
         summary["success"] &= test_result["success"]
+        summary["test_success"] &= test_result["test_success"]
+        summary["stat"][0]["test_success"] = summary["test_success"]
     return summary

@@ -41,6 +41,7 @@ class HttpRunner(object):
     teststeps: List[Step]
 
     success: bool = False  # indicate testcase execution result
+    test_success: bool = False
     __config: TConfig
     __teststeps: List[TStep]
     __project_meta: ProjectMeta = None
@@ -89,7 +90,7 @@ class HttpRunner(object):
         return self
 
     def __call_hooks(
-        self, hooks: Hooks, step_variables: VariablesMapping, hook_msg: Text,
+            self, hooks: Hooks, step_variables: VariablesMapping, hook_msg: Text,
     ):
         """ call hook actions.
 
@@ -204,25 +205,31 @@ class HttpRunner(object):
         # validate
         validators = step.validators
         session_success = False
+        test_success = False
         try:
-            resp_obj.validate(
+            validate_pass = resp_obj.validate(
                 validators, variables_mapping, self.__project_meta.functions
             )
             session_success = True
+            test_success = validate_pass
         except ValidationFailure:
             session_success = False
+            test_success = False
             log_req_resp_details()
             # log testcase duration before raise ValidationFailure
             self.__duration = time.time() - self.__start_at
             raise
         finally:
             self.success = session_success
+            self.test_success &= test_success
             step_data.success = session_success
+            step_data.test_success = test_success
 
             if hasattr(self.__session, "data"):
                 # httprunner.client.HttpSession, not locust.clients.HttpSession
                 # save request & response meta data
                 self.__session.data.success = session_success
+                self.__session.data.test_success = test_success
                 self.__session.data.validators = resp_obj.validation_results
 
                 # save step data
@@ -280,7 +287,9 @@ class HttpRunner(object):
         step_data.data = case_result.get_step_datas()  # list of step data
         step_data.export_vars = case_result.get_export_variables()
         step_data.success = case_result.success
+        step_data.test_success = case_result.test_success
         self.success = case_result.success
+        self.test_success = case_result.test_success
 
         if step_data.export_vars:
             logger.info(f"export variables: {step_data.export_vars}")
@@ -407,6 +416,7 @@ class HttpRunner(object):
         return TestCaseSummary(
             name=self.__config.name,
             success=self.success,
+            test_success=self.test_success,
             case_id=self.__case_id,
             time=TestCaseTime(
                 start_at=self.__start_at,
