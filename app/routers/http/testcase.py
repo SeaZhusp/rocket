@@ -44,7 +44,7 @@ async def delete_testcase(pk: int, user_info=Depends(Permission())):
 
 
 @router.post("/run")
-async def run_testcase(case: TestcaseRunBody):
+async def run_testcase(case: TestcaseRunBody, user_info=Depends(Permission())):
     case = await TestcaseDao.get_detail_with_id(pk=case.id)
     steps = json.loads(case.body).get("steps")
     apis = []
