@@ -20,7 +20,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 
 # 请求参数校验异常处理器
-async def body_validation_exception_handler(request: Request, err: RequestValidationError):
+async def validation_exception_handler(request: Request, err: RequestValidationError):
     message = ""
     data = {}
     for raw_error in err.raw_errors:
@@ -68,8 +68,10 @@ async def global_exception_handler(request: Request, exc: Exception):
         return await permission_exception_handler(request, exc)
     elif isinstance(exc, AuthException):
         return await auth_exception_handler(request, exc)
-    elif isinstance(exc, ValidationError):
-        return await res_validation_exception_handler(request, exc)
+    # elif isinstance(exc, RequestValidationError):
+    #     return await validation_exception_handler(request, exc)
+    # elif isinstance(exc, ValidationError):
+    #     return await res_validation_exception_handler(request, exc)
     else:
         import traceback
         logger.exception(traceback.format_exc())

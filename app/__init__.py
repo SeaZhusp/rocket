@@ -1,14 +1,17 @@
 import json
 
 from fastapi import FastAPI, Request, Depends
+from fastapi.exceptions import RequestValidationError
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.Auth import request_context
 from app.routers import router_list
-from app.core.exc.exceptions import BusinessException
+from app.core.exc.exceptions import BusinessException, AuthException, PermissionException
 from app.core.Response import ResponseDto
-from app.core.exc.exceptions_handler import business_exception_handler, global_exception_handler
+from app.core.exc.exceptions_handler import business_exception_handler, global_exception_handler, \
+    http_exception_handler, validation_exception_handler, auth_exception_handler, permission_exception_handler
 from config import LOGGING_CONF
 
 rocket = FastAPI()
@@ -67,7 +70,11 @@ async def register_middlewares(_app: FastAPI):
 
 async def create_global_exception_handler(_app: FastAPI):
     """创建全局异常处理器"""
-    exception_handler_list = [(BusinessException, business_exception_handler),
+    exception_handler_list = [(StarletteHTTPException, http_exception_handler),
+                              (RequestValidationError, validation_exception_handler),
+                              (AuthException, auth_exception_handler),
+                              (PermissionException, permission_exception_handler),
+                              (BusinessException, business_exception_handler),
                               (Exception, global_exception_handler)
                               ]
     for exception_name, exception_handler in exception_handler_list:

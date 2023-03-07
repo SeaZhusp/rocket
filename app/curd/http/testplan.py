@@ -1,4 +1,5 @@
 from app.base.curd import BaseCurd
+from app.models.http.envconfig import EnvConfig
 from app.models.http.testplan import Testplan
 
 
@@ -14,7 +15,9 @@ class TestplanDao(BaseCurd):
             kwargs.update(project_id=project_id)
         if search != "":
             kwargs.update(name=f"%{search}%")
-        total, apis = cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"], **kwargs)
+        # total, apis = cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"], **kwargs)
+        total, apis = cls.get_with_join(page=page, limit=limit, query_fields=[EnvConfig.name],
+                                        join_con=[EnvConfig, EnvConfig.id == Testplan.env_id])
         return total, apis
 
     @classmethod

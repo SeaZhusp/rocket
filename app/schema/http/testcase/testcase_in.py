@@ -3,7 +3,7 @@ from typing import Union, List
 
 from pydantic import Field, validator
 
-from app.base.schema import RocketBaseSchema, Step, TestcaseBody
+from app.base.schema import RocketBaseSchema, TestcaseBody
 
 
 class TestcaseCreateBody(RocketBaseSchema):
