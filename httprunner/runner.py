@@ -41,7 +41,7 @@ class HttpRunner(object):
     teststeps: List[Step]
 
     success: bool = False  # indicate testcase execution result
-    test_success: bool = False
+    test_success: bool = True
     __config: TConfig
     __teststeps: List[TStep]
     __project_meta: ProjectMeta = None

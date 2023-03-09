@@ -199,10 +199,12 @@ class ResponseObject(object):
         functions_mapping = functions_mapping or {}
 
         self.validation_results = {}
-        if not validators:
-            return
 
         validate_pass = True
+
+        if not validators:
+            return validate_pass
+
         failures = []
 
         for v in validators:
