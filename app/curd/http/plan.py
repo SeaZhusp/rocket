@@ -40,3 +40,9 @@ class PlanDetailDao(BaseCurd):
     @classmethod
     async def list_all(cls, plan_id: int):
         return cls.get_with_params(plan_id=plan_id)
+
+    @classmethod
+    async def list_testcase(cls, plan_id: int, page: int = 1, limit: int = 10):
+        details = cls.get_with_pagination(page=page, limit=limit)
+        testcase_ids = [detail.testcase_id for detail in details]
+

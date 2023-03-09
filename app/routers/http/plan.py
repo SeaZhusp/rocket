@@ -46,3 +46,13 @@ async def get_plan_detail_tree(plan_id: int):
     catalog_ids = [testcase.catalog_id for testcase in testcases]
     tree = await CatalogDao.get_catalog_tree_with_ids(catalog_ids)
     return ResponseDto(data=tree)
+
+
+@router.get("/detail/testcase/list")
+async def list_plan_detail_testcase(plan_id: int, catalog_id="", page: int = 1, limit: int = 10):
+    details = await PlanDetailDao.list_all(plan_id)
+    testcase_ids = [detail.testcase_id for detail in details]
+    total, testcases = await TestcaseDao.list_by_ids_with_condition(testcase_ids, catalog_id)
+    total_page = ComputerUtils.get_total_page(total, limit)
+    paging = dict(page=page, limit=limit, total=total, total_page=total_page)
+    return ListResponseDto(paging=paging, data=testcases)
