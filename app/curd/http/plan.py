@@ -1,10 +1,10 @@
 from app.base.curd import BaseCurd
 from app.models.http.envconfig import EnvConfig
-from app.models.http.testplan import Testplan
+from app.models.http.plan import Plan, PlanDetail
 
 
-class TestplanDao(BaseCurd):
-    model = Testplan
+class PlanDao(BaseCurd):
+    model = Plan
 
     @classmethod
     async def list(cls, project_id: int, status="", search="", page: int = 1, limit: int = 10):
@@ -16,19 +16,27 @@ class TestplanDao(BaseCurd):
         if search != "":
             kwargs.update(name=f"%{search}%")
         # total, apis = cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"], **kwargs)
-        total, apis = cls.get_with_join(page=page, limit=limit, query_fields=[EnvConfig.name],
-                                        join_con=[EnvConfig, EnvConfig.id == Testplan.env_id])
-        return total, apis
+        total, plans = cls.get_with_join(page=page, limit=limit, query_fields=[EnvConfig.name],
+                                         join_con=[EnvConfig, EnvConfig.id == Plan.env_id])
+        return total, plans
 
     @classmethod
-    async def create(cls, testplan):
-        o = Testplan(**testplan.dict())
+    async def create(cls, plan):
+        o = Plan(**plan.dict())
         cls.insert_with_model(model_obj=o)
 
     @classmethod
-    async def update(cls, testplan):
-        return cls.update_with_id(model=testplan)
+    async def update(cls, plan):
+        return cls.update_with_id(model=plan)
 
     @classmethod
     async def delete(cls, pk: int):
         cls.delete_with_id(pk=pk)
+
+
+class PlanDetailDao(BaseCurd):
+    model = PlanDetail
+
+    @classmethod
+    async def list_all(cls, plan_id: int):
+        return cls.get_with_params(plan_id=plan_id)

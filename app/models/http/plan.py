@@ -3,8 +3,8 @@ from sqlalchemy import Column, String, INT
 from app.base.model import RocketBaseModel
 
 
-class Testplan(RocketBaseModel):
-    __tablename__ = "http_testplan"
+class Plan(RocketBaseModel):
+    __tablename__ = "http_plan"
 
     name = Column(String(128), nullable=False, comment="用例名称")
     desc = Column(String(200), comment="备注")
@@ -14,3 +14,10 @@ class Testplan(RocketBaseModel):
 
     env_id = Column(INT, comment="环境ID")
     project_id = Column(INT, comment="项目ID")
+
+
+class PlanDetail(RocketBaseModel):
+    __tablename__ = "http_plan_detail"
+
+    plan_id = Column(INT, nullable=False, comment="计划ID")
+    testcase_id = Column(INT, nullable=False, comment="用例ID")

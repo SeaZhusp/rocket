@@ -1,12 +1,11 @@
 from typing import Union
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from app.base.schema import RocketBaseSchema
-from app.utils.utils import StringUtils
 
 
-class TestplanCreateBody(RocketBaseSchema):
+class PlanCreateBody(RocketBaseSchema):
     name: str = Field(..., title="接口名称", description="必传")
     cron: str = Field(..., title="cron表达式", description="必传")
     status: int = Field(..., title="状态", description="必传")
@@ -17,9 +16,9 @@ class TestplanCreateBody(RocketBaseSchema):
     project_id: int
 
 
-class TestplanUpdateBody(TestplanCreateBody):
+class PlanUpdateBody(PlanCreateBody):
     id: int = Field(..., title="接口id", description="必传")
 
 
-class TestplanRunBody(RocketBaseSchema):
+class PlanRunBody(RocketBaseSchema):
     id: int

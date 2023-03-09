@@ -39,3 +39,7 @@ class TestcaseDao(BaseCurd):
     @classmethod
     async def get_detail_with_id(cls, pk: int):
         return cls.get_with_id(pk=pk)
+
+    @classmethod
+    async def list_all_by_ids(cls, ids):
+        return cls.get_with_params(filter_list=[Testcase.id.in_(ids)])

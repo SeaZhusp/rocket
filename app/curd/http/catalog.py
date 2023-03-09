@@ -25,12 +25,10 @@ class CatalogDao(BaseCurd):
         return cls.get_with_params(project_id=project_id, used=used)
 
     @classmethod
-    async def get_catalog_tree(cls, used, project_id):
+    def __change_2_tree(cls, catalogs):
         tree = list()
         source = list()
         tree_dict = dict()
-        catalogs = cls.get_with_params(used=used, project_id=project_id, _sort=["create_time"],
-                                       _sort_type="asc")
         for catalog in catalogs:
             source.append(dict(label=catalog.name,
                                id=catalog.id,
@@ -47,6 +45,21 @@ class CatalogDao(BaseCurd):
                 parent.setdefault("children", []).append(tree_dict[i])
             else:
                 tree.append(tree_dict[i])
+        return tree
+
+    @classmethod
+    async def get_catalog_tree(cls, used, project_id):
+        catalogs = cls.get_with_params(used=used, project_id=project_id, _sort=["create_time"],
+                                       _sort_type="asc")
+        tree = cls.__change_2_tree(catalogs)
+        return tree
+
+    @classmethod
+    async def get_catalog_tree_with_ids(cls, ids):
+        catalogs = cls.get_with_params(filter_list=[Catalog.id.in_(ids)])
+        parent_ids = [catalog.parent_id for catalog in catalogs if catalog.parent_id]
+        catalogs = cls.get_with_params(filter_list=[Catalog.id.in_(ids + parent_ids)])
+        tree = cls.__change_2_tree(catalogs)
         return tree
 
     @classmethod

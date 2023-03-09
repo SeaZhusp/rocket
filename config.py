@@ -2,8 +2,8 @@ import os
 
 
 class Config(object):
-    # MYSQL_HOST = "172.17.122.101"
-    MYSQL_HOST = "127.0.0.1"
+    MYSQL_HOST = "172.17.122.101"
+    # MYSQL_HOST = "127.0.0.1"
     MYSQL_USER = "root"
     MYSQL_PWD = "123456"
     MYSQL_PORT = 3306

@@ -45,17 +45,17 @@ class BaseCurd(object):
     model: Type[RocketBaseModel] = None
 
     @classmethod
-    def __filter_k_v(cls, filter_list: list = None, delete_flg: bool = False, **kwargs):
+    def __filter_k_v(cls, filter_list: list = None, contains_delete: bool = False, **kwargs):
         """
         获取过滤条件
         :param filter_list: 过滤条件，比较特殊的，or_(xxx == xxx)
         :param kwargs: 不定传参，xx = xx
-        :param delete_flg: delete_flg = True时，不过滤删除数据
+        :param contains_delete: contains_delete = True时，不过滤删除数据
         :return: conditions
         """
         filter_list = filter_list if filter_list else list()
         # 判断表是否有del_flag字段
-        if getattr(cls.model, "deleted", None) and not delete_flg:
+        if getattr(cls.model, "deleted", None) and not contains_delete:
             # 只取未删除的数据
             filter_list.append(getattr(cls.model, "deleted") == DeleteEnum.no.value)
         for k, v in kwargs.items():
