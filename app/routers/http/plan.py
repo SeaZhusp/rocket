@@ -39,12 +39,12 @@ async def delete_plan(pk: int, user_info=Depends(Permission())):
 
 
 @router.get("/detail/catalog/tree")
-async def get_plan_detail_tree(plan_id: int):
+async def get_plan_detail_tree(plan_id: int, project_id: int, used: int):
     details = await PlanDetailDao.list_all(plan_id)
     testcase_ids = [detail.testcase_id for detail in details]
     testcases = await TestcaseDao.list_all_by_ids(testcase_ids)
     catalog_ids = [testcase.catalog_id for testcase in testcases]
-    tree = await CatalogDao.get_catalog_tree_with_ids(catalog_ids)
+    tree = await CatalogDao.get_catalog_tree_with_ids(catalog_ids, used, project_id)
     return ResponseDto(data=tree)
 
 
@@ -56,3 +56,9 @@ async def list_plan_detail_testcase(plan_id: int, catalog_id="", page: int = 1, 
     total_page = ComputerUtils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=testcases)
+
+
+@router.delete("/detail/testcase/remove/{pk}")
+async def remove_plan_detail_testcase(pk: int):
+    await PlanDetailDao.remove_testcase(pk=pk)
+    return ResponseDto(msg="删除成功")

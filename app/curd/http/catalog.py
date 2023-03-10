@@ -55,10 +55,31 @@ class CatalogDao(BaseCurd):
         return tree
 
     @classmethod
-    async def get_catalog_tree_with_ids(cls, ids):
+    def __recursive_query_catalog(cls, catalog_id_map, catalogs, new_catalogs=None):
+        if new_catalogs is None:
+            new_catalogs = []
+
+        def find_ids(_id):
+            _catalog = catalog_id_map[_id]
+            new_catalogs.append(_catalog)
+            _parent_id = _catalog.parent_id
+            if _parent_id:
+                find_ids(_parent_id)
+
+        for catalog in catalogs:
+            new_catalogs.append(catalog)
+            parent_id = catalog.parent_id
+            if parent_id:
+                find_ids(parent_id)
+        return new_catalogs
+
+    @classmethod
+    async def get_catalog_tree_with_ids(cls, ids, used: int, project_id: int):
+        all_catalogs = cls.get_with_params(used=used, project_id=project_id, _sort=["create_time"], _sort_type="asc")
+        catalog_id_map = {catalog.id: catalog for catalog in all_catalogs}
         catalogs = cls.get_with_params(filter_list=[Catalog.id.in_(ids)])
-        parent_ids = [catalog.parent_id for catalog in catalogs if catalog.parent_id]
-        catalogs = cls.get_with_params(filter_list=[Catalog.id.in_(ids + parent_ids)])
+        # parent_ids = [catalog.parent_id for catalog in catalogs if catalog.parent_id]
+        catalogs = cls.__recursive_query_catalog(catalog_id_map, catalogs)
         tree = cls.__change_2_tree(catalogs)
         return tree
 

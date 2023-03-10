@@ -46,3 +46,6 @@ class PlanDetailDao(BaseCurd):
         details = cls.get_with_pagination(page=page, limit=limit)
         testcase_ids = [detail.testcase_id for detail in details]
 
+    @classmethod
+    async def remove_testcase(cls, pk: int):
+        return cls.delete_with_id(pk=pk)
