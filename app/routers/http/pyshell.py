@@ -1,7 +1,7 @@
-import importlib
 import os
-import traceback
 import types
+import importlib
+import traceback
 
 from fastapi import APIRouter, Depends
 
@@ -9,7 +9,7 @@ from app.core.Enums import DutyEnum
 from app.core.Response import ResponseDto
 from app.core.Auth import Permission
 from app.schema.http.pyshell.pyshell_in import DebugFunctionBody, CreatePyshellBody, SavePyshellBody
-from app.utils.utils import get_function_from_content, parse_function_meta
+from app.utils.parser import parse_function_from_content, parse_function_meta
 
 router = APIRouter(prefix="/pyshell")
 
@@ -31,7 +31,7 @@ async def get_func(module_name: str, user_info=Depends(Permission())):
         return ResponseDto(msg=f"{module_name}不存在")
     with open(module, "r", encoding="utf8") as f:
         content = f.read()
-    functions = get_function_from_content(content)
+    functions = parse_function_from_content(content)
     return ResponseDto(data=dict(content=content, functions=functions))
 
 

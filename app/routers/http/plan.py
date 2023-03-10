@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
 from app.core.Response import ListResponseDto, ResponseDto
-from app.curd.http.catalog import CatalogDao
+from app.curd.manage.catalog import CatalogDao
 from app.curd.http.plan import PlanDao, PlanDetailDao
 from app.curd.http.testcase import TestcaseDao
 from app.schema.http.plan.plan_in import PlanCreateBody, PlanUpdateBody

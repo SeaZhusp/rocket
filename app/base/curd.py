@@ -57,7 +57,7 @@ class BaseCurd(object):
         # 判断表是否有del_flag字段
         if getattr(cls.model, "deleted", None) and not contains_delete:
             # 只取未删除的数据
-            filter_list.append(getattr(cls.model, "deleted") == DeleteEnum.no.value)
+            filter_list.append(getattr(cls.model, "deleted") == DeleteEnum.NO.value)
         for k, v in kwargs.items():
             # 过滤None的字段值，注意 0 和 False
             if v is None:
@@ -268,7 +268,7 @@ class BaseCurd(object):
         query_obj = query.first()
         if query_obj is None:
             raise BusinessException("数据不存在")
-        setattr(query_obj, "deleted", DeleteEnum.yes.value)
+        setattr(query_obj, "deleted", DeleteEnum.YES.value)
         session.commit()
         session.refresh(query_obj)
         return query_obj

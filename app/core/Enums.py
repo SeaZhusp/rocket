@@ -13,24 +13,29 @@ class StatusEnum(IntEnum):
 
 
 class DeleteEnum(IntEnum):
-    yes = 1  # 删除
-    no = 0  # 没删除
+    YES = 1  # 删除
+    NO = 0  # 没删除
 
 
 class ProjectTypeEnum(IntEnum):
-    api = 0  # 接口
+    API = 1  # 接口
+
+
+class CatalogUsedEnum(IntEnum):
+    API = 1
+    TESTCASE = 2
 
 
 class CodeEnum(Enum):
     """编码枚举类"""
     OK = (200, "请求成功")
-    HTTP_ERROR = (201, "HTTP错误")
-    PARAMS_ERROR = (101, "请求参数错误")
-    JSON_ERROR = (102, "json解析失败")
-    BUSINESS_ERROR = (110, "系统处理异常, 请重试")
+    PARAMS_ERROR = (1000, "请求参数错误")
+    JSON_ERROR = (2000, "json解析失败")
+    BUSINESS_ERROR = (3000, "业务处理异常, 请重试")
+    HTTP_ERROR = (4000, "HTTP错误")
+    SYSTEM_ERROR = (5000, "系统内部错误")
     AUTH_ERROR = (401, "Token认证失败")
     PERMISSION_ERROR = (403, "权限不足, 请联系管理员")
-    SYSTEM_ERROR = (500, "系统内部错误, 请重试")
 
     @property
     def code(self) -> int:

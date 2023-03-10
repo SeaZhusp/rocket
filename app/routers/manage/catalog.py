@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.Auth import Permission
 from app.core.Response import ResponseDto
-from app.curd.http.catalog import CatalogDao
+from app.curd.manage.catalog import CatalogDao
 from app.schema.http.catalog.catalog_in import CatalogCreateBody, CatalogUpdateBody
 
 router = APIRouter(prefix="/catalog")
