@@ -2,6 +2,8 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends
 
+from app.facade.http.report import ReportFacade, ReportDetailFacade
+from app.utils.logger import log_exception
 from config import Config
 
 from app.core.auth import Auth
@@ -67,7 +69,9 @@ async def run_plan(pk: int, user_info=Depends(Auth())):
             apis.append(api.to_dict())
         testcases.append({"case_id": case.id, "testcase": apis})
     config = await EnvConfigFacade.get_detail_with_id(pk=plan.env_id)
-    executor.submit(execute_plan, testcases, config)
+    env_name = config.name
+    executor.submit(execute_plan, testcases, config, plan, env_name, user_info.get("fullname", "系统执行")) \
+        .add_done_callback(log_exception)
     return ResponseDto(msg="后台执行中，请稍后前往报告中心查看")
 
 
@@ -104,6 +108,20 @@ async def add_plan_detail_testcase(plan_detail: PlanDetailCreateBody, user_info=
     return ResponseDto(msg="添加成功")
 
 
-def execute_plan(testcases, config):
+def execute_plan(testcases, config, plan, env_name, create_user):
     http_run = HttpRunning(testcases, config.to_dict())
     summary = http_run.run_testcase()
+    report_info = {
+        "name": plan.name,
+        "test_begin_time": summary["stat"][0]["start_time"],
+        "duration": summary["stat"][0]["duration"],
+        "create_user": create_user,
+        "total": summary["stat"][0]["total"],
+        "passed": summary["stat"][0]["success"],
+        "failed": summary["stat"][0]["failed"],
+        "pass_rate": "{}%".format(round(summary["stat"][0]["success"] / summary["stat"][0]["total"], 1)),
+        "env_name": env_name,
+        "project_id": plan.project_id,
+    }
+    report = ReportFacade.create(report_info)
+    ReportDetailFacade.create({"summary": json.dumps(summary), "report_id": report.id})

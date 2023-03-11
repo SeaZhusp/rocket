@@ -249,6 +249,7 @@ class BaseCurd(object):
         :return:
         """
         session.add(model_obj)
+        session.flush()
         session.commit()
         return model_obj
 

@@ -72,7 +72,7 @@ async def save_pyshell(pyshell_meta: SavePyshellBody, user_info=Depends(Auth()))
     module = os.path.join(pyshell_path, module_name)
     if not os.path.exists(module):
         return ResponseDto(msg=f"{module_name}不存在")
-    with open(module, 'w', encoding='utf8') as f:
+    with open(module, "w", encoding="utf8") as f:
         f.write(content)
     return ResponseDto(msg="保存成功")
 
