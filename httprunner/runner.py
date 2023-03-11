@@ -247,7 +247,7 @@ class HttpRunner(object):
         if step.setup_hooks:
             self.__call_hooks(step.setup_hooks, step_variables, "setup testcase")
 
-        if hasattr(step.testcase, "config") and hasattr(step.testcase, "teststeps"):
+        if hasattr(step.testcase, "envconfig") and hasattr(step.testcase, "teststeps"):
             testcase_cls = step.testcase
             case_result = (
                 testcase_cls()
@@ -329,7 +329,7 @@ class HttpRunner(object):
         """run specified testcase
 
         Examples:
-            >>> testcase_obj = TestCase(config=TConfig(...), teststeps=[TStep(...)])
+            >>> testcase_obj = TestCase(envconfig=TConfig(...), teststeps=[TStep(...)])
             >>> HttpRunner().with_project_meta(project_meta).run_testcase(testcase_obj)
 
         """
@@ -352,7 +352,7 @@ class HttpRunner(object):
             # override variables
             # step variables > extracted variables from previous steps
             step.variables = merge_variables(step.variables, extracted_variables)
-            # step variables > testcase config variables
+            # step variables > testcase envconfig variables
             step.variables = merge_variables(step.variables, self.__config.variables)
 
             # parse variables
@@ -443,7 +443,7 @@ class HttpRunner(object):
         )
         log_handler = logger.add(self.__log_path, level="DEBUG")
 
-        # parse config name
+        # parse envconfig name
         config_variables = self.__config.variables
         if param:
             config_variables.update(param)

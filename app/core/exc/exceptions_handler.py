@@ -7,10 +7,17 @@ from pydantic import ValidationError
 from starlette.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.Enums import CodeEnum
+from app.core.enums import CodeEnum
 from app.core.exc.exceptions import BusinessException, PermissionException, AuthException
-from app.core.Response import ResponseDto
-from config import HTTP_MSG_MAP
+from app.core.response import ResponseDto
+
+HTTP_MSG_MAP = {
+    404: "请求路径找不到",
+    405: "请求方法不支持",
+    408: "请求超时",
+    500: "服务器内部错误",
+    302: "请求方法不支持"
+}
 
 
 # 自定义http异常处理器

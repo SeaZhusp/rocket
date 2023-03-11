@@ -4,11 +4,11 @@ from fastapi import Header, Request
 
 from app.core.exc.exceptions import AuthException, PermissionException
 from app.curd.system.user import UserDao
-from app.core.TokenAuth import UserToken
-from app.core.Enums import DutyEnum
+from app.utils.token import UserToken
+from app.core.enums import DutyEnum
 
 
-class Permission:
+class Auth(object):
 
     def __init__(self, duty: int = DutyEnum.member.value):
         self.duty = duty

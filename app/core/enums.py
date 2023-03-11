@@ -26,6 +26,15 @@ class CatalogUsedEnum(IntEnum):
     TESTCASE = 2
 
 
+class ValueTypeEnum(int, Enum):
+    STRING = 1
+    INT = 2
+    FLOAT = 3
+    BOOL = 4
+    LIST = 5
+    DICT = 6
+
+
 class CodeEnum(Enum):
     """编码枚举类"""
     OK = (200, "请求成功")

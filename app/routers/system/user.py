@@ -2,22 +2,22 @@ import json
 
 from fastapi import APIRouter, Depends
 
-from app.core.Auth import Permission
-from app.core.Enums import DutyEnum
+from app.core.auth import Auth
+from app.core.enums import DutyEnum
 from app.curd.manage.project import ProjectDao
 from app.curd.system.dictionary import DictDao
 from app.curd.system.user import UserDao
-from app.core.TokenAuth import UserToken
+from app.utils.token import UserToken
 from app.utils.utils import ComputerUtils
 from app.schema.system.user.user_in import UserCreateBody, UserLoginBody, UserUpdateBody
-from app.core.Response import ListResponseDto, ResponseDto
+from app.core.response import ListResponseDto, ResponseDto
 from app.schema.system.user.user_out import UserDto
 
 router = APIRouter(prefix="/user")
 
 
 @router.post("/create")
-async def create_user(user: UserCreateBody, user_info=Depends(Permission(DutyEnum.admin))):
+async def create_user(user: UserCreateBody, user_info=Depends(Auth(DutyEnum.admin))):
     await UserDao.create(user)
     return ResponseDto(msg="创建成功")
 
@@ -37,7 +37,7 @@ async def login(login_user: UserLoginBody):
 
 
 @router.get("/list")
-async def list_user(page: int = 1, limit: int = 10, search: str = None, user_info=Depends(Permission())):
+async def list_user(page: int = 1, limit: int = 10, search: str = None, user_info=Depends(Auth())):
     total, users = await UserDao.list(page=page, limit=limit, search=search)
     total_page = ComputerUtils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
@@ -45,12 +45,12 @@ async def list_user(page: int = 1, limit: int = 10, search: str = None, user_inf
 
 
 @router.delete("/delete/{pk}")
-async def delete_user(pk: int, user_info=Depends(Permission(DutyEnum.admin))):
+async def delete_user(pk: int, user_info=Depends(Auth(DutyEnum.admin))):
     await UserDao.delete(pk=pk)
     return ResponseDto(msg="删除成功")
 
 
 @router.put("/update")
-async def update_user(user: UserUpdateBody, user_info=Depends(Permission(DutyEnum.admin))):
+async def update_user(user: UserUpdateBody, user_info=Depends(Auth(DutyEnum.admin))):
     await UserDao.update(user)
     return ResponseDto(msg="更新成功")

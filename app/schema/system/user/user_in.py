@@ -3,7 +3,7 @@ from typing import Union
 from pydantic import validator, Field
 
 from app.base.schema import RocketBaseSchema
-from app.core.Enums import DutyEnum, StatusEnum
+from app.core.enums import DutyEnum, StatusEnum
 from app.utils.crypto import Crypto
 
 from config import Config

@@ -2,14 +2,14 @@ import os
 
 from fastapi import APIRouter, UploadFile, File, Depends
 
-from app.core.Auth import Permission
+from app.core.auth import Auth
 from config import FilePath
 
 router = APIRouter(prefix="/file")
 
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), user_info=Depends(Permission())):
+async def upload_file(file: UploadFile = File(...), user_info=Depends(Auth())):
     content = file.file.read()
     file_path = os.path.join(FilePath.FILE_PATH, file.filename)
     with open(file_path, "wb") as f:

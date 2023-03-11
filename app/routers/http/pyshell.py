@@ -5,9 +5,9 @@ import traceback
 
 from fastapi import APIRouter, Depends
 
-from app.core.Enums import DutyEnum
-from app.core.Response import ResponseDto
-from app.core.Auth import Permission
+from app.core.enums import DutyEnum
+from app.core.response import ResponseDto
+from app.core.auth import Auth
 from app.schema.http.pyshell.pyshell_in import DebugFunctionBody, CreatePyshellBody, SavePyshellBody
 from app.utils.parser import parse_function_from_content, parse_function_meta
 
@@ -17,7 +17,7 @@ pyshell_path = os.path.join(os.path.abspath("."), "pyshell")
 
 
 @router.get("/list")
-async def list_pyshell(user_info=Depends(Permission())):
+async def list_pyshell(user_info=Depends(Auth())):
     modules = []
     for root, dirs, files in os.walk(pyshell_path):
         modules.extend([{"value": file} for file in files if "__init__.py" != file and file.endswith(".py")])
@@ -25,7 +25,7 @@ async def list_pyshell(user_info=Depends(Permission())):
 
 
 @router.get("/info")
-async def get_func(module_name: str, user_info=Depends(Permission())):
+async def get_func(module_name: str, user_info=Depends(Auth())):
     module = os.path.join(pyshell_path, module_name)
     if not os.path.exists(module):
         return ResponseDto(msg=f"{module_name}不存在")
@@ -36,7 +36,7 @@ async def get_func(module_name: str, user_info=Depends(Permission())):
 
 
 @router.post("/debug")
-async def debug_function(debug_functions: DebugFunctionBody, user_info=Depends(Permission())):
+async def debug_function(debug_functions: DebugFunctionBody, user_info=Depends(Auth())):
     module_name = debug_functions.module_name
     func_express = debug_functions.func_express
     try:
@@ -53,7 +53,7 @@ async def debug_function(debug_functions: DebugFunctionBody, user_info=Depends(P
 
 
 @router.post("/create")
-async def create_pyshell(pyshell: CreatePyshellBody, user_info=Depends(Permission())):
+async def create_pyshell(pyshell: CreatePyshellBody, user_info=Depends(Auth())):
     module_name = pyshell.module_name
     if module_name.find(".py") == -1:
         return ResponseDto(msg="请创建正确格式的py文件")
@@ -66,7 +66,7 @@ async def create_pyshell(pyshell: CreatePyshellBody, user_info=Depends(Permissio
 
 
 @router.put("/save")
-async def save_pyshell(pyshell_meta: SavePyshellBody, user_info=Depends(Permission())):
+async def save_pyshell(pyshell_meta: SavePyshellBody, user_info=Depends(Auth())):
     content = pyshell_meta.content
     module_name = pyshell_meta.module_name
     module = os.path.join(pyshell_path, module_name)
@@ -78,7 +78,7 @@ async def save_pyshell(pyshell_meta: SavePyshellBody, user_info=Depends(Permissi
 
 
 @router.delete("/delete")
-async def delete_pyshell(pyshell: CreatePyshellBody, user_info=Depends(Permission(DutyEnum.admin))):
+async def delete_pyshell(pyshell: CreatePyshellBody, user_info=Depends(Auth(DutyEnum.admin))):
     module_name = pyshell.module_name
     module = os.path.join(pyshell_path, module_name)
     if module_name == "rocket.py":

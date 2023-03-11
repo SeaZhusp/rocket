@@ -22,3 +22,8 @@ class PlanUpdateBody(PlanCreateBody):
 
 class PlanRunBody(RocketBaseSchema):
     id: int
+
+
+class PlanDetailCreateBody(RocketBaseSchema):
+    plan_id: int
+    testcase_id: int

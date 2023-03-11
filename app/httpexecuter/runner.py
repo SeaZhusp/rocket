@@ -1,11 +1,11 @@
 import json
 import time
 
-from ext.httprunning.loader import load_functions
-from ext.httprunning.report import get_summary
+from app.utils.loader import load_functions
+from app.httpexecuter.report import get_summary
 from httprunner import HttpRunner
 from httprunner.models import TestCase, TConfig, TStep, ProjectMeta
-from ext.httprunning.parser import parse_variables, parse_step, parse_headers
+from app.utils.parser import parse_variables, parse_step, parse_headers
 
 
 class HttpRunning(object):
@@ -55,8 +55,8 @@ class HttpRunning(object):
             h_testcase = self.__handle_testcase(testcase["testcase"], config)
             # parse_case_use = round(time.time() - parse_case_at, 2)
             # http_run_at = time.time()
-            runner = HttpRunner()\
-                .with_project_meta(ProjectMeta(functions=functions))\
+            runner = HttpRunner() \
+                .with_project_meta(ProjectMeta(functions=functions)) \
                 .with_case_id(case_id=testcase["case_id"])
             runner.run_testcase(h_testcase)
             # http_run__use = round(time.time() - parse_case_at, 2)

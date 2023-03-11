@@ -33,6 +33,10 @@ class PlanDao(BaseCurd):
     async def delete(cls, pk: int):
         cls.delete_with_id(pk=pk)
 
+    @classmethod
+    async def get_detail_with_id(cls, pk):
+        return cls.get_with_id(pk=pk)
+
 
 class PlanDetailDao(BaseCurd):
     model = PlanDetail
@@ -43,9 +47,15 @@ class PlanDetailDao(BaseCurd):
 
     @classmethod
     async def list_testcase(cls, plan_id: int, page: int = 1, limit: int = 10):
+        # todo
         details = cls.get_with_pagination(page=page, limit=limit)
         testcase_ids = [detail.testcase_id for detail in details]
 
     @classmethod
-    async def remove_testcase(cls, pk: int):
-        return cls.delete_with_id(pk=pk)
+    async def remove_testcase(cls, plan_detail):
+        cls.delete_with_params(plan_id=plan_detail.plan_id, testcase_id=plan_detail.testcase_id)
+
+    @classmethod
+    async def create(cls, plan_detail):
+        o = PlanDetail(**plan_detail.dict())
+        cls.insert_with_model(model_obj=o)

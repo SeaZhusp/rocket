@@ -235,12 +235,12 @@ class ResponseObject(object):
 
             # expect item
             expect_item = u_validator["expect"]
-            # parse expected value with config/teststep/extracted variables
+            # parse expected value with envconfig/teststep/extracted variables
             expect_value = parse_data(expect_item, variables_mapping, functions_mapping)
 
             # message
             message = u_validator["message"]
-            # parse message with config/teststep/extracted variables
+            # parse message with envconfig/teststep/extracted variables
             message = parse_data(message, variables_mapping, functions_mapping)
 
             validate_msg = f"assert {check_item} {assert_method} {expect_value}({type(expect_value).__name__})"

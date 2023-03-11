@@ -1,5 +1,5 @@
 from app.base.curd import BaseCurd
-from app.core.Enums import CatalogUsedEnum
+from app.core.enums import CatalogUsedEnum
 from app.facade.manage.catalog import CatalogFacade
 from app.models.http.api import Api
 from app.schema.http.api.api_out import ApiDto

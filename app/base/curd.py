@@ -7,14 +7,11 @@ from app.base.model import RocketBaseModel
 from typing import Type, Union
 
 from app.base.schema import RocketBaseSchema
-from app.core.Enums import DeleteEnum
+from app.core.enums import DeleteEnum
 from app.base.dto import RocketBaseDto
 from app.core.exc.exceptions import BusinessException
-# from app.commons.requests.request_model import BaseBody
-# from app.commons.responses.response_model import BaseDto
 from functools import wraps
 from app.models import Session
-from app.models.system.user import User
 
 
 def connect(func):
@@ -272,6 +269,26 @@ class BaseCurd(object):
         session.commit()
         session.refresh(query_obj)
         return query_obj
+
+    @classmethod
+    @connect
+    def delete_with_params(cls, session: Session, filter_list: list = None, **kwargs):
+        """
+        按条件删除
+        :param session:
+        :param filter_list:
+        :param kwargs:
+        :return:
+        """
+        query = cls.query_wrapper(session, filter_list, **kwargs)
+        query_objs = query.all()
+        if query_objs is None:
+            raise BusinessException("数据不存在")
+        for query_obj in query_objs:
+            setattr(query_obj, "deleted", DeleteEnum.YES.value)
+            session.commit()
+            session.refresh(query_obj)
+        return query_objs
 
     @classmethod
     @connect

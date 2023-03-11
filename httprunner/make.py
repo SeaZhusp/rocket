@@ -68,7 +68,7 @@ class {{ class_name }}(HttpRunner):
 
     {% endif %}
 
-    config = {{ config_chain_style }}
+    envconfig = {{ config_chain_style }}
 
     teststeps = [
         {% for step_chain_style in teststeps_chain_style %}
@@ -360,7 +360,7 @@ def make_testcase(testcase: Dict, dir_path: Text = None) -> Text:
     # validate testcase format
     load_testcase(testcase)
 
-    testcase_abs_path = __ensure_absolute(testcase["config"]["path"])
+    testcase_abs_path = __ensure_absolute(testcase["envconfig"]["path"])
     logger.info(f"start to make testcase: {testcase_abs_path}")
 
     testcase_python_abs_path, testcase_cls_name = convert_testcase_path(
@@ -375,7 +375,7 @@ def make_testcase(testcase: Dict, dir_path: Text = None) -> Text:
     if testcase_python_abs_path in pytest_files_made_cache_mapping:
         return testcase_python_abs_path
 
-    config = testcase["config"]
+    config = testcase["envconfig"]
     config["path"] = convert_relative_project_root_dir(testcase_python_abs_path)
     config["variables"] = convert_variables(
         config.get("variables", {}), testcase_abs_path
@@ -399,11 +399,11 @@ def make_testcase(testcase: Dict, dir_path: Text = None) -> Text:
         if "request" in test_content and "name" in test_content:
             test_content = ensure_testcase_v3_api(test_content)
 
-        test_content.setdefault("config", {})["path"] = ref_testcase_path
+        test_content.setdefault("envconfig", {})["path"] = ref_testcase_path
         ref_testcase_python_abs_path = make_testcase(test_content)
 
         # override testcase export
-        ref_testcase_export: List = test_content["config"].get("export", [])
+        ref_testcase_export: List = test_content["envconfig"].get("export", [])
         if ref_testcase_export:
             step_export: List = teststep.setdefault("export", [])
             step_export.extend(ref_testcase_export)
@@ -466,7 +466,7 @@ def make_testsuite(testsuite: Dict):
     # validate testsuite format
     load_testsuite(testsuite)
 
-    testsuite_config = testsuite["config"]
+    testsuite_config = testsuite["envconfig"]
     testsuite_path = testsuite_config["path"]
     testsuite_variables = convert_variables(
         testsuite_config.get("variables", {}), testsuite_path
@@ -485,33 +485,33 @@ def make_testsuite(testsuite: Dict):
         testcase_file = testcase["testcase"]
         testcase_path = __ensure_absolute(testcase_file)
         testcase_dict = load_test_file(testcase_path)
-        testcase_dict.setdefault("config", {})
-        testcase_dict["config"]["path"] = testcase_path
+        testcase_dict.setdefault("envconfig", {})
+        testcase_dict["envconfig"]["path"] = testcase_path
 
         # override testcase name
-        testcase_dict["config"]["name"] = testcase["name"]
+        testcase_dict["envconfig"]["name"] = testcase["name"]
         # override base_url
         base_url = testsuite_config.get("base_url") or testcase.get("base_url")
         if base_url:
-            testcase_dict["config"]["base_url"] = base_url
+            testcase_dict["envconfig"]["base_url"] = base_url
         # override verify
         if "verify" in testsuite_config:
-            testcase_dict["config"]["verify"] = testsuite_config["verify"]
+            testcase_dict["envconfig"]["verify"] = testsuite_config["verify"]
         # override variables
-        # testsuite testcase variables > testsuite config variables
+        # testsuite testcase variables > testsuite envconfig variables
         testcase_variables = convert_variables(
             testcase.get("variables", {}), testcase_path
         )
         testcase_variables = merge_variables(testcase_variables, testsuite_variables)
-        # testsuite testcase variables > testcase config variables
-        testcase_dict["config"]["variables"] = convert_variables(
-            testcase_dict["config"].get("variables", {}), testcase_path
+        # testsuite testcase variables > testcase envconfig variables
+        testcase_dict["envconfig"]["variables"] = convert_variables(
+            testcase_dict["envconfig"].get("variables", {}), testcase_path
         )
-        testcase_dict["config"]["variables"].update(testcase_variables)
+        testcase_dict["envconfig"]["variables"].update(testcase_variables)
 
         # override weight
         if "weight" in testcase:
-            testcase_dict["config"]["weight"] = testcase["weight"]
+            testcase_dict["envconfig"]["weight"] = testcase["weight"]
 
         # make testcase
         testcase_pytest_path = make_testcase(testcase_dict, testsuite_dir)
@@ -558,21 +558,21 @@ def __make(tests_path: Text):
         if "request" in test_content and "name" in test_content:
             test_content = ensure_testcase_v3_api(test_content)
 
-        if "config" not in test_content:
+        if "envconfig" not in test_content:
             logger.warning(
                 f"Invalid testcase/testsuite file: {test_file}\n"
-                f"reason: missing config part."
+                f"reason: missing envconfig part."
             )
             continue
-        elif not isinstance(test_content["config"], Dict):
+        elif not isinstance(test_content["envconfig"], Dict):
             logger.warning(
                 f"Invalid testcase/testsuite file: {test_file}\n"
-                f"reason: config should be dict type, got {test_content['config']}"
+                f"reason: envconfig should be dict type, got {test_content['envconfig']}"
             )
             continue
 
         # ensure path absolute
-        test_content.setdefault("config", {})["path"] = test_file
+        test_content.setdefault("envconfig", {})["path"] = test_file
 
         # testcase
         if "teststeps" in test_content:
