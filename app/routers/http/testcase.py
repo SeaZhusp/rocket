@@ -9,7 +9,7 @@ from app.facade.http.api import ApiFacade
 from app.facade.http.envconfig import EnvConfigFacade
 from app.schema.http.testcase.testcase_in import TestcaseCreateBody, TestcaseUpdateBody, TestcaseRunBody
 from app.utils.utils import ComputerUtils
-from app.httpexecuter import HttpRunning
+from app.core.httpexecutor import HttpRunning
 
 router = APIRouter(prefix="/testcase")
 

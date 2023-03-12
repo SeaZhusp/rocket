@@ -4,7 +4,7 @@ from fastapi import Header, Request
 
 from app.core.exc.exceptions import AuthException, PermissionException
 from app.curd.system.user import UserDao
-from app.utils.token import UserToken
+from app.core.token import UserToken
 from app.core.enums import DutyEnum
 
 

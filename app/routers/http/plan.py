@@ -1,8 +1,8 @@
 import json
-import time
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends
 
+from app.core.dingtalk import DingTalk
 from app.facade.http.report import ReportFacade
 from app.utils.logger import log_exception
 from config import Config
@@ -15,7 +15,7 @@ from app.curd.http.plan import PlanDao, PlanDetailDao
 from app.facade.http.api import ApiFacade
 from app.facade.http.envconfig import EnvConfigFacade
 from app.facade.http.testcase import TestcaseFacade
-from app.httpexecuter import HttpRunning
+from app.core.httpexecutor import HttpRunning
 from app.schema.http.plan.plan_in import PlanCreateBody, PlanUpdateBody, PlanDetailCreateBody
 from app.utils.utils import ComputerUtils
 
@@ -113,7 +113,7 @@ def execute_plan(testcases, config, plan, env_name, create_user):
     http_run = HttpRunning(testcases, config.to_dict())
     summary = http_run.run_testcase()
     report_info = {
-        "name": "{}_{}".format(plan.name, time.strftime("%Y-%m-%d %H:%M:%S")),
+        "name": plan.name,
         "test_begin_time": summary["stat"][0]["start_time"],
         "duration": summary["stat"][0]["duration"],
         "create_user": create_user,
@@ -125,4 +125,7 @@ def execute_plan(testcases, config, plan, env_name, create_user):
         "project_id": plan.project_id,
         "summary": json.dumps(summary)
     }
-    ReportFacade.create(report_info)
+    report = ReportFacade.create(report_info)
+    ding_talk = DingTalk(plan.webhook)
+    ding_talk.send_msg(report_url="http://127.0.0.1:5555/#/http/report/view?report_id={}".format(report.id),
+                       **report_info)

@@ -7,7 +7,7 @@ from app.core.enums import DutyEnum
 from app.curd.manage.project import ProjectDao
 from app.curd.system.dictionary import DictDao
 from app.curd.system.user import UserDao
-from app.utils.token import UserToken
+from app.core.token import UserToken
 from app.utils.utils import ComputerUtils
 from app.schema.system.user.user_in import UserCreateBody, UserLoginBody, UserUpdateBody
 from app.core.response import ListResponseDto, ResponseDto
