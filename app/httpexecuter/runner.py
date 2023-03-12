@@ -63,7 +63,7 @@ class HttpRunning(object):
             test_results.append(runner.get_summary().dict())
         # gen_summary_at = time.time()
         summary = get_summary(test_results)
-        summary["stat"][0]["duration"] = round(time.time() - start_time, 2)
+        summary["stat"][0]["duration"] = round(time.time() - start_time, 3)
         summary["stat"][0]["start_time"] = start_at
         # gen_summary_use = round(time.time() - gen_summary_at, 2)
 

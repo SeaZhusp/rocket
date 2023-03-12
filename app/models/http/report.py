@@ -16,12 +16,6 @@ class Report(RocketBaseModel):
     failed = Column(INT, comment="失败数")
     pass_rate = Column(String(10), comment="通过率")
     env_name = Column(String(128), comment="执行环境名")
+    summary = Column(LONGTEXT, comment="报告详情")
 
     project_id = Column(INT, comment="项目ID")
-
-
-class ReportDetail(RocketBaseModel):
-    __tablename__ = "http_report_detail"
-
-    report_id = Column(INT, comment="报告ID")
-    summary = Column(LONGTEXT, comment="报告详情")

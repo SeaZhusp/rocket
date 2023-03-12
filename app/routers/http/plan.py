@@ -1,8 +1,9 @@
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends
 
-from app.facade.http.report import ReportFacade, ReportDetailFacade
+from app.facade.http.report import ReportFacade
 from app.utils.logger import log_exception
 from config import Config
 
@@ -112,7 +113,7 @@ def execute_plan(testcases, config, plan, env_name, create_user):
     http_run = HttpRunning(testcases, config.to_dict())
     summary = http_run.run_testcase()
     report_info = {
-        "name": plan.name,
+        "name": "{}_{}".format(plan.name, time.strftime("%Y-%m-%d %H:%M:%S")),
         "test_begin_time": summary["stat"][0]["start_time"],
         "duration": summary["stat"][0]["duration"],
         "create_user": create_user,
@@ -122,6 +123,6 @@ def execute_plan(testcases, config, plan, env_name, create_user):
         "pass_rate": "{}%".format(round(summary["stat"][0]["success"] / summary["stat"][0]["total"], 1)),
         "env_name": env_name,
         "project_id": plan.project_id,
+        "summary": json.dumps(summary)
     }
-    report = ReportFacade.create(report_info)
-    ReportDetailFacade.create({"summary": json.dumps(summary), "report_id": report.id})
+    ReportFacade.create(report_info)

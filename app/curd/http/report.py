@@ -1,5 +1,5 @@
 from app.base.curd import BaseCurd
-from app.models.http.report import Report, ReportDetail
+from app.models.http.report import Report
 
 
 class ReportDao(BaseCurd):
@@ -14,10 +14,6 @@ class ReportDao(BaseCurd):
     async def delete(cls, pk):
         cls.delete_with_id(pk=pk)
 
-
-class ReportDetailDao(BaseCurd):
-    model = ReportDetail
-
     @classmethod
-    async def info(cls, report_id):
-        return cls.get_with_first(report_id=report_id)
+    async def info(cls, pk):
+        return cls.get_with_id(pk=pk)

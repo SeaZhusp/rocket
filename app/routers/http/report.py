@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends
 
 from app.core.auth import Auth
 from app.core.response import ListResponseDto, ResponseDto
-from app.curd.http.report import ReportDao, ReportDetailDao
+from app.curd.http.report import ReportDao
+
 from app.utils.utils import ComputerUtils
 
 router = APIRouter(prefix="/report")
@@ -22,9 +23,7 @@ async def delete_report(pk: int, user_info=Depends(Auth())):
     return ResponseDto(msg="删除成功")
 
 
-@router.get("/info")
+@router.get("/view")
 async def get_report_info(report_id: int, user_info=Depends(Auth())):
-    report_detail = await ReportDetailDao.info(report_id)
-    if not report_detail:
-        return ResponseDto(msg="暂无报告内容")
-    return ResponseDto(data=report_detail.summary)
+    report_detail = await ReportDao.info(report_id)
+    return ResponseDto(data=report_detail)
