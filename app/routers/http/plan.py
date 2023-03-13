@@ -120,7 +120,7 @@ def execute_plan(testcases, config, plan, env_name, create_user):
         "total": summary["stat"][0]["total"],
         "passed": summary["stat"][0]["success"],
         "failed": summary["stat"][0]["failed"],
-        "pass_rate": "{}%".format(round(summary["stat"][0]["success"] / summary["stat"][0]["total"], 1)),
+        "pass_rate": "{}%".format(round(summary["stat"][0]["success"] / summary["stat"][0]["total"] * 100, 1)),
         "env_name": env_name,
         "project_id": plan.project_id,
         "summary": json.dumps(summary)
