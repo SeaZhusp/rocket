@@ -15,7 +15,7 @@ from app.curd.http.plan import PlanDao, PlanDetailDao
 from app.facade.http.api import ApiFacade
 from app.facade.http.envconfig import EnvConfigFacade
 from app.facade.http.testcase import TestcaseFacade
-from app.core.httpexecutor import HttpRunning
+from app.libs.http_run import HttpRunning
 from app.schema.http.plan.plan_in import PlanCreateBody, PlanUpdateBody, PlanDetailCreateBody
 from app.utils.utils import ComputerUtils
 

@@ -2,7 +2,7 @@ import json
 import time
 
 from app.utils.loader import load_functions
-from app.core.httpexecutor.report import get_summary
+from app.libs.http_run.report import get_summary
 from httprunner import HttpRunner
 from httprunner.models import TestCase, TConfig, TStep, ProjectMeta
 from app.utils.parser import parse_variables, parse_step, parse_headers
