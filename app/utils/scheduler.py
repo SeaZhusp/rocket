@@ -20,10 +20,15 @@ class Scheduler(object):
         Scheduler.scheduler.start()
 
     @staticmethod
-    def add_test_plan(plan_id, plan_name, cron):
-        return Scheduler.scheduler.add_job(func=Executor.run_test_plan, args=(plan_id,),
+    def add_test_plan(call, **kwargs):
+        cron = kwargs.get("cron", None)
+        plan_name = kwargs.get("plan_name", None)
+        plan_id = kwargs.get("plan_id", None)
+        if not cron or not plan_name or not plan_id:
+            raise Exception("cron、plan_name、plan_id can not empty")
+        return Scheduler.scheduler.add_job(func=call, kwargs=kwargs,
                                            name=plan_name, id=str(plan_id),
-                                           trigger=CronTrigger.from_crontab(cron))
+                                           trigger=CronTrigger.from_crontab(cron, timezone="Asia/Shanghai"))
 
     @staticmethod
     def edit_test_plan(plan_id, plan_name, cron):

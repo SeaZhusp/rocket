@@ -231,9 +231,9 @@ class BaseCurd(object):
         :return:
         """
         # https://docs.sqlalchemy.org/en/14/errors.html#error-bhk3
-        if getattr(cls.model, "update_id") and getattr(cls.model, "update_name") and user:
-            kwargs["update_id"] = user["id"]
-            kwargs["update_name"] = user["username"]
+        # if getattr(cls.model, "update_id") and getattr(cls.model, "update_name") and user:
+        #     kwargs["update_id"] = user["id"]
+        #     kwargs["update_name"] = user["username"]
         query_obj = session.query(cls.model).filter(*filter_list)
         query_obj.update(kwargs)
         session.commit()

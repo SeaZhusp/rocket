@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends
 from app.core.auth import Auth
 from app.core.response import ListResponseDto, ResponseDto
 from app.curd.http.testcase import TestcaseDao
-from app.facade.http.api import ApiFacade
-from app.facade.http.envconfig import EnvConfigFacade
+from app.curd.facade.http.api import ApiFacade
+from app.curd.facade.http.envconfig import EnvConfigFacade
 from app.schema.http.testcase.testcase_in import TestcaseCreateBody, TestcaseUpdateBody, TestcaseRunBody
 from app.utils.utils import ComputerUtils
 from app.libs.http_run import HttpRunning

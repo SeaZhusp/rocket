@@ -1,6 +1,6 @@
 from app.base.curd import BaseCurd
 from app.core.enums import CatalogUsedEnum
-from app.facade.manage.catalog import CatalogFacade
+from app.curd.facade.manage.catalog import CatalogFacade
 from app.models.http.testcase import Testcase
 from app.utils.utils import CurdUtil
 

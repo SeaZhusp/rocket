@@ -30,6 +30,10 @@ class PlanDao(BaseCurd):
         return cls.update_with_id(model=plan)
 
     @classmethod
+    async def change_status(cls, pk, status):
+        return cls.update_by_map(filter_list=[Plan.id == pk], status=status)
+
+    @classmethod
     async def delete(cls, pk: int):
         cls.delete_with_id(pk=pk)
 

@@ -1,5 +1,7 @@
 import json
 
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Request, Depends
 from fastapi.exceptions import RequestValidationError
 from loguru import logger
@@ -12,7 +14,8 @@ from app.core.exc.exceptions import BusinessException, AuthException, Permission
 from app.core.response import ResponseDto
 from app.core.exc.exceptions_handler import business_exception_handler, global_exception_handler, \
     http_exception_handler, validation_exception_handler, auth_exception_handler, permission_exception_handler
-from config import LOGGING_CONF
+from app.utils.scheduler import Scheduler
+from config import LOGGING_CONF, Config
 
 rocket = FastAPI()
 
@@ -85,3 +88,18 @@ def init_logging(logging_conf=LOGGING_CONF):
     for log_handler, log_conf in logging_conf.items():
         log_file = log_conf.pop("file", None)
         logger.add(log_file, **log_conf)
+
+
+async def register_scheduler(_app: FastAPI):
+    job_store = {
+        "default": SQLAlchemyJobStore(url=Config.SQLALCHEMY_DATABASE_URI, engine_options={"pool_recycle": 1500},
+                                      pickle_protocol=3),
+    }
+    job_defaults = {
+        "coalesce": True,
+        "misfire_grace_time": 600000
+    }
+    scheduler = AsyncIOScheduler()
+    Scheduler.init(scheduler)
+    Scheduler.configure(jobstores=job_store, job_defaults=job_defaults)
+    Scheduler.start()
