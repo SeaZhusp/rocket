@@ -17,7 +17,7 @@ class PlanDao(BaseCurd):
             kwargs.update(name=f"%{search}%")
         # total, apis = cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"], **kwargs)
         total, plans = cls.get_with_join(page=page, limit=limit, query_fields=[EnvConfig.name],
-                                         join_con=[EnvConfig, EnvConfig.id == Plan.env_id])
+                                         join_con=[EnvConfig, EnvConfig.id == Plan.env_id], **kwargs)
         return total, plans
 
     @classmethod

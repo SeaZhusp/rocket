@@ -6,9 +6,9 @@ class ReportDao(BaseCurd):
     model = Report
 
     @classmethod
-    async def list(cls, search, page, limit):
+    async def list(cls, project_id, search, page, limit):
         return cls.get_with_pagination(page=page, limit=limit, _sort=["create_time"],
-                                       name=f"%{search}%" if search else None)
+                                       name=f"%{search}%" if search else None, project_id=project_id)
 
     @classmethod
     async def delete(cls, pk):

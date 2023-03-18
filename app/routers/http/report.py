@@ -10,8 +10,8 @@ router = APIRouter(prefix="/report")
 
 
 @router.get("/list")
-async def list_report(search="", page: int = 1, limit: int = 10):
-    total, envs = await ReportDao.list(search, page, limit)
+async def list_report(project_id: int, search="", page: int = 1, limit: int = 10):
+    total, envs = await ReportDao.list(project_id, search, page, limit)
     total_page = ComputerUtils.get_total_page(total, limit)
     paging = dict(page=page, limit=limit, total=total, total_page=total_page)
     return ListResponseDto(paging=paging, data=envs)
