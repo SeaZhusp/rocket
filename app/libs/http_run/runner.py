@@ -48,7 +48,7 @@ class HttpRunning(object):
         start_at = time.strftime("%Y-%m-%d %H:%M:%S")
         start_time = time.time()
         config = self.__handle_tmp_config()
-        functions = load_functions()
+        functions = load_functions(self.my_config.get("functions") or {})
         test_results = []
         for testcase in self.testcases:
             # parse_case_at = time.time()

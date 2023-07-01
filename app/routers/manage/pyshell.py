@@ -38,9 +38,10 @@ async def debug_function(debug_functions: DebugFunctionBody, user_info=Depends(A
     func_express = debug_functions.func_express
 
     pyshell = await PyshellDao.get_pyshell(module_name=module_name)
-    code = pyshell.code
+
     try:
-        module_functions_dict = ModuleUtils.get_functions_map(code, module_name)
+        # get_functions_map接受list，所以要转成list
+        module_functions_dict = ModuleUtils.get_functions_map([pyshell])
         function_meta = parse_function_meta(func_express)
         result = module_functions_dict[function_meta["func_name"]](*function_meta["args"])
         return ResponseDto(msg="执行成功", data=result)

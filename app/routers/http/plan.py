@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends
 
 from app.curd.mix.http_mix import HttpMixFacade
-from app.libs.http_run.executor import execute_plan
+from app.libs.http_run.executor import sync_execute_plan
 from app.utils.scheduler import Scheduler
 from app.utils.logger import log_exception
 from config import Config
@@ -46,7 +46,9 @@ async def update_plan(plan: PlanUpdateBody, user_info=Depends(Auth())):
 async def add_job(pk: int, user_info=Depends(Auth())):
     create_user = user_info.get("fullname", "系统执行")
     kwargs = await HttpMixFacade.get_execute_plan_kwargs(plan_id=pk, create_user=create_user)
-    Scheduler.add_test_plan(execute_plan, **kwargs)
+    # config中包含functions，加入定时任务会报错，所以先把config删除掉
+    kwargs.pop("config")
+    Scheduler.add_test_plan(sync_execute_plan, **kwargs)
     await PlanDao.change_status(pk, 1)
     return ResponseDto(msg="定时任务开启")
 
@@ -66,26 +68,8 @@ async def delete_plan(pk: int, user_info=Depends(Auth())):
 
 @router.post("/run/{pk}")
 async def run_plan(pk: int, user_info=Depends(Auth())):
-    # plan = await PlanDao.get_detail_with_id(pk=pk)
-    # details = await PlanDetailDao.list_all(pk)
-    # testcase_ids = [detail.testcase_id for detail in details]
-    # cases = await TestcaseFacade.list_all_by_ids(testcase_ids)
-    # testcases = []
-    # for case in cases:
-    #     apis = []
-    #     steps = json.loads(case.body).get("steps")
-    #     if not steps:
-    #         continue
-    #     for step in steps:
-    #         if step.get("status") != 1:
-    #             continue
-    #         api = await ApiFacade.get_detail_with_id(step.get("id"))
-    #         apis.append(api.to_dict())
-    #     testcases.append({"case_id": case.id, "testcase": apis})
-    # config = await EnvConfigFacade.get_detail_with_id(pk=plan.env_id)
-    # env_name = config.name
     kwargs = await HttpMixFacade.get_execute_plan_kwargs(plan_id=pk, create_user=user_info.get("fullname", "系统执行"))
-    executor.submit(execute_plan, **kwargs).add_done_callback(log_exception)
+    executor.submit(sync_execute_plan, **kwargs).add_done_callback(log_exception)
     return ResponseDto(msg="后台执行中，请稍后前往报告中心查看")
 
 

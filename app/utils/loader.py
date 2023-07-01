@@ -10,11 +10,12 @@ def load_module_functions(module):
     return module_functions
 
 
-def load_functions(func_file_list=None):
+def load_functions(functions_in):
     builtin = ["rocket.py"]
-    if (func_file_list is None) or (not isinstance(func_file_list, list)):
-        func_file_list = []
+    # if (func_file_list is None) or (not isinstance(func_file_list, list)):
+    #     func_file_list = {}
     functions = {}
+    func_file_list = []
     func_file_list.extend(builtin)
     for func_file in func_file_list:
         try:
@@ -24,4 +25,5 @@ def load_functions(func_file_list=None):
         imported_module = importlib.reload(imported_module)
         module_functions = load_module_functions(imported_module)
         functions.update(module_functions)
+    functions.update(functions_in)
     return functions

@@ -93,19 +93,35 @@ class CurdUtils(object):
 class ModuleUtils(object):
     """模块工具"""
 
+    # @staticmethod
+    # def get_functions_map(code, module_name):
+    #     functions_map = {}
+    #     # 动态创建Python模块
+    #     module = types.ModuleType(module_name)
+    #
+    #     # 将代码添加到模块中
+    #     exec(code, module.__dict__)
+    #
+    #     # 获取模块中的方法
+    #     for name, function in inspect.getmembers(module, inspect.isfunction):
+    #         # 使用反射调用方法
+    #         result = function
+    #         functions_map.update({name: function})
+    #         # print(f"Method '{name}' returned: {result}")
+    #     return functions_map
+
     @staticmethod
-    def get_functions_map(code, module_name):
+    def get_functions_map(pyshell_list: list):
         functions_map = {}
-        # 动态创建Python模块
-        module = types.ModuleType(module_name)
-
-        # 将代码添加到模块中
-        exec(code, module.__dict__)
-
-        # 获取模块中的方法
-        for name, function in inspect.getmembers(module, inspect.isfunction):
-            # 使用反射调用方法
-            result = function
-            functions_map.update({name: function})
-            # print(f"Method '{name}' returned: {result}")
+        for pyshell in pyshell_list:
+            code = pyshell.code
+            module_name = pyshell.module_name
+            # 动态创建Python模块
+            module = types.ModuleType(module_name)
+            # 将代码添加到模块中
+            exec(code, module.__dict__)
+            # 获取模块中的方法
+            for name, function in inspect.getmembers(module, inspect.isfunction):
+                # 使用反射调用方法
+                functions_map.update({name: function})
         return functions_map

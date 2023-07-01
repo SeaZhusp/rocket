@@ -2,8 +2,10 @@ import json
 
 from fastapi import APIRouter, Depends
 
+from app.curd.facade.http.envconfig import EnvConfigFacade
+from app.curd.facade.manage.pyshell import PyshellFacade
 from app.curd.http.envconfig import EnvConfigDao
-from app.utils.utils import ComputerUtils
+from app.utils.utils import ComputerUtils, ModuleUtils
 from app.curd.http.api import ApiDao
 from app.core.auth import Auth
 from app.curd.manage.catalog import CatalogDao
@@ -54,7 +56,7 @@ async def update_api(api: ApiUpdateBody, user_info=Depends(Auth())):
 @router.post("/run")
 async def run_apis(single_api: SingleApiRunBody, user_info=Depends(Auth())):
     api = await ApiDao.get_detail_with_id(pk=single_api.api_id)
-    config = await EnvConfigDao.get_detail_with_id(pk=single_api.env_id)
-    http_run = HttpRunning([{"case_id": api.id, "testcase": [api.to_dict()]}], config.to_dict())
+    config_map = await EnvConfigFacade.get_and_parse_config(pk=single_api.env_id)
+    http_run = HttpRunning([{"case_id": api.id, "testcase": [api.to_dict()]}], config_map)
     summary = http_run.run_testcase()
     return ResponseDto(data=summary)

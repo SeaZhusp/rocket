@@ -53,7 +53,7 @@ async def run_testcase(case: TestcaseRunBody, user_info=Depends(Auth())):
             continue
         api = await ApiFacade.get_detail_with_id(step.get("id"))
         apis.append(api.to_dict())
-    config = await EnvConfigFacade.get_detail_with_id(pk=case.env_id)
-    http_run = HttpRunning([{"case_id": case.id, "testcase": apis}], config.to_dict())
+    config_map = await EnvConfigFacade.get_and_parse_config(pk=case.env_id)
+    http_run = HttpRunning([{"case_id": case.id, "testcase": apis}], config_map)
     summary = http_run.run_testcase()
     return ResponseDto(data=summary)

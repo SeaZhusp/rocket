@@ -1,9 +1,11 @@
 import json
 
+from app.curd.facade.manage.pyshell import PyshellFacade
 from app.curd.http.plan import PlanDao, PlanDetailDao
 from app.curd.facade.http.api import ApiFacade
 from app.curd.facade.http.envconfig import EnvConfigFacade
 from app.curd.facade.http.testcase import TestcaseFacade
+from app.utils.utils import ModuleUtils
 
 
 class HttpMixFacade(object):
@@ -26,12 +28,12 @@ class HttpMixFacade(object):
                 api = await ApiFacade.get_detail_with_id(step.get("id"))
                 apis.append(api.to_dict())
             testcases.append({"case_id": case.id, "testcase": apis})
-        config = await EnvConfigFacade.get_detail_with_id(pk=plan.env_id)
-        env_name = config.name
+        config_map = await EnvConfigFacade.get_and_parse_config(pk=plan.env_id)
+        env_name = config_map.get("name")
         return {
             "plan_id": plan_id,
             "testcases": testcases,
-            "config": config,
+            "config": config_map,
             "plan": plan,
             "env_name": env_name,
             "create_user": create_user,

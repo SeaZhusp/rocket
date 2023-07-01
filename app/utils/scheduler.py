@@ -26,6 +26,7 @@ class Scheduler(object):
         plan_id = kwargs.get("plan_id", None)
         if not cron or not plan_name or not plan_id:
             raise Exception("cron、plan_name、plan_id can not empty")
+        print(kwargs)
         return Scheduler.scheduler.add_job(func=call, kwargs=kwargs,
                                            name=plan_name, id=str(plan_id),
                                            trigger=CronTrigger.from_crontab(cron, timezone="Asia/Shanghai"))
