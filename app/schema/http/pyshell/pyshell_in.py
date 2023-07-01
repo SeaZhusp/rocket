@@ -11,4 +11,4 @@ class CreatePyshellBody(RocketBaseSchema):
 
 
 class SavePyshellBody(CreatePyshellBody):
-    content: str
+    code: str

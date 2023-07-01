@@ -1,6 +1,6 @@
 from app.base.curd import BaseCurd
 from app.curd.facade.http.api import ApiFacade
-from app.utils.utils import CurdUtil
+from app.utils.utils import CurdUtils
 from app.models.manage.catalog import Catalog
 from app.curd.manage.project import ProjectDao
 from app.core.exc.exceptions import BusinessException
@@ -28,15 +28,15 @@ class CatalogDao(BaseCurd):
     @classmethod
     async def get_catalog_tree(cls, used, project_id):
         catalogs = cls.get_with_params(used=used, project_id=project_id, _sort=["create_time"], _sort_type="asc")
-        tree = CurdUtil.parse_2_tree(catalogs)
+        tree = CurdUtils.parse_2_tree(catalogs)
         return tree
 
     @classmethod
     async def get_catalog_tree_with_ids(cls, ids, used: int, project_id: int):
         all_catalogs = cls.get_with_params(used=used, project_id=project_id, _sort=["create_time"], _sort_type="asc")
         catalogs = cls.get_with_params(filter_list=[Catalog.id.in_(ids)])
-        catalogs = CurdUtil.recursive_parent_catalog(catalogs, all_catalogs)
-        tree = CurdUtil.parse_2_tree(catalogs)
+        catalogs = CurdUtils.recursive_parent_catalog(catalogs, all_catalogs)
+        tree = CurdUtils.parse_2_tree(catalogs)
         return tree
 
     @classmethod

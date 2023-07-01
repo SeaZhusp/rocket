@@ -1,7 +1,11 @@
 import math
+import types
+import inspect
 
 
 class StringUtils(object):
+    """字符串工具"""
+
     @staticmethod
     def not_empty(v):
         if isinstance(v, str) and len(v.strip()) == 0:
@@ -13,12 +17,15 @@ class StringUtils(object):
 
 
 class ComputerUtils(object):
+    """计算工具"""
+
     @staticmethod
     def get_total_page(total: int, size: int) -> int:
         return math.ceil(total / size)
 
 
-class CurdUtil(object):
+class CurdUtils(object):
+    """Curd工具"""
 
     @staticmethod
     def recursive_parent_catalog(catalogs, all_catalogs):
@@ -56,6 +63,11 @@ class CurdUtil(object):
 
     @staticmethod
     def parse_2_tree(catalogs):
+        """
+        解析成树结构
+        :param catalogs: 所有目录
+        :return:
+        """
         tree = list()
         source = list()
         tree_dict = dict()
@@ -76,3 +88,24 @@ class CurdUtil(object):
             else:
                 tree.append(tree_dict[i])
         return tree
+
+
+class ModuleUtils(object):
+    """模块工具"""
+
+    @staticmethod
+    def get_functions_map(code, module_name):
+        functions_map = {}
+        # 动态创建Python模块
+        module = types.ModuleType(module_name)
+
+        # 将代码添加到模块中
+        exec(code, module.__dict__)
+
+        # 获取模块中的方法
+        for name, function in inspect.getmembers(module, inspect.isfunction):
+            # 使用反射调用方法
+            result = function
+            functions_map.update({name: function})
+            # print(f"Method '{name}' returned: {result}")
+        return functions_map

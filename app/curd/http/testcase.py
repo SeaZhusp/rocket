@@ -2,7 +2,7 @@ from app.base.curd import BaseCurd
 from app.core.enums import CatalogUsedEnum
 from app.curd.facade.manage.catalog import CatalogFacade
 from app.models.http.testcase import Testcase
-from app.utils.utils import CurdUtil
+from app.utils.utils import CurdUtils
 
 
 class TestcaseDao(BaseCurd):
@@ -18,7 +18,7 @@ class TestcaseDao(BaseCurd):
             kwargs.update(level=level)
         if catalog_id != "":
             all_catalogs = await CatalogFacade.list(CatalogUsedEnum.TESTCASE, project_id)
-            ids = CurdUtil.recursive_child_with_catalog_id(int(catalog_id), all_catalogs)
+            ids = CurdUtils.recursive_child_with_catalog_id(int(catalog_id), all_catalogs)
             filter_list.append(Testcase.catalog_id.in_(ids))
         if search != "":
             kwargs.update(name=f"%{search}%")

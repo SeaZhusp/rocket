@@ -3,7 +3,7 @@ from app.core.enums import CatalogUsedEnum
 from app.curd.facade.manage.catalog import CatalogFacade
 from app.models.http.api import Api
 from app.schema.http.api.api_out import ApiDto
-from app.utils.utils import CurdUtil
+from app.utils.utils import CurdUtils
 
 
 class ApiDao(BaseCurd):
@@ -26,7 +26,7 @@ class ApiDao(BaseCurd):
             kwargs.update(level=level)
         if catalog_id != "":
             all_catalogs = await CatalogFacade.list(CatalogUsedEnum.API, project_id)
-            ids = CurdUtil.recursive_child_with_catalog_id(int(catalog_id), all_catalogs)
+            ids = CurdUtils.recursive_child_with_catalog_id(int(catalog_id), all_catalogs)
             filter_list.append(Api.catalog_id.in_(ids))
         if search != "":
             kwargs.update(name=f"%{search}%")

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, UniqueConstraint
+from sqlalchemy import Column, String
 
 from app.base.model import RocketBaseModel
 
