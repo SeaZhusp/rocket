@@ -60,7 +60,11 @@ class HttpRunning(object):
                 .with_case_id(case_id=testcase["case_id"])
             runner.run_testcase(h_testcase)
             # http_run__use = round(time.time() - parse_case_at, 2)
-            test_results.append(runner.get_summary().dict())
+            test_result = runner.get_summary().dict()
+            case_name = testcase.get("case_name", None)
+            if case_name:
+                test_result["name"] = case_name
+            test_results.append(test_result)
         # gen_summary_at = time.time()
         summary = get_summary(test_results)
         summary["stat"][0]["duration"] = round(time.time() - start_time, 3)

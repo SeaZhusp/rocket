@@ -1,6 +1,6 @@
 from app.core.exc.exceptions import BusinessException
 from app.base.curd import BaseCurd
-from app.models.http.envconfig import EnvConfig
+from app.models.manage.envconfig import EnvConfig
 
 
 class EnvConfigDao(BaseCurd):

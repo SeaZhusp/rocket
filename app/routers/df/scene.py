@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends
 from app.core.auth import Auth
 from app.core.enums import DutyEnum
 from app.core.response import ResponseDto, ListResponseDto
-from app.curd.http.envconfig import EnvConfigDao
-from app.schema.http.envconfig.envconfig_in import EnvConfigCreateBody, EnvConfigUpdateBody
+from app.curd.manage.envconfig import EnvConfigDao
+from app.schema.manage.envconfig.envconfig_in import EnvConfigCreateBody, EnvConfigUpdateBody
 from app.utils.utils import ComputerUtils
 
-router = APIRouter(prefix="/envconfig")
+router = APIRouter(prefix="/scene")
 
 
 @router.get("/list")

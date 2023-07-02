@@ -4,7 +4,7 @@ from app.base.model import RocketBaseModel
 
 
 class Catalog(RocketBaseModel):
-    __tablename__ = "http_catalog"
+    __tablename__ = "manage_catalog"
 
     name = Column(String(32), nullable=False, comment="目录名称")
     used = Column(INT, nullable=False, comment="目录用于 1:api 2:testcase")

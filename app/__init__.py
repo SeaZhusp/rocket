@@ -96,8 +96,8 @@ async def register_scheduler(_app: FastAPI):
                                       pickle_protocol=3),
     }
     job_defaults = {
-        "coalesce": True,
-        "misfire_grace_time": 600000
+        "coalesce": True,  # 表示忽略服务器宕机时间段内的任务执行（否则就会出现服务器恢复之后一下子执行多次任务的情况）
+        "misfire_grace_time": 600000  # 容忍错过触发时间的时间间隔,默认1秒
     }
     scheduler = AsyncIOScheduler()
     Scheduler.init(scheduler)

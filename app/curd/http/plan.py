@@ -1,5 +1,5 @@
 from app.base.curd import BaseCurd
-from app.models.http.envconfig import EnvConfig
+from app.models.manage.envconfig import EnvConfig
 from app.models.http.plan import Plan, PlanDetail
 
 
@@ -36,10 +36,6 @@ class PlanDao(BaseCurd):
     @classmethod
     async def delete(cls, pk: int):
         cls.delete_with_id(pk=pk)
-
-    @classmethod
-    async def get_detail_with_id(cls, pk):
-        return cls.get_with_id(pk=pk)
 
 
 class PlanDetailDao(BaseCurd):

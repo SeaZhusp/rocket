@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends
 
-from app.curd.mix.http_mix import HttpMixFacade
+from app.curd.facade.mix.http_mix import HttpMixFacade
 from app.libs.http_run.executor import sync_execute_plan
 from app.utils.scheduler import Scheduler
 from app.utils.logger import log_exception
@@ -13,7 +13,7 @@ from app.core.response import ListResponseDto, ResponseDto
 from app.curd.manage.catalog import CatalogDao
 from app.curd.http.plan import PlanDao, PlanDetailDao
 from app.curd.facade.http.testcase import TestcaseFacade
-from app.schema.http.plan.plan_in import PlanCreateBody, PlanUpdateBody, PlanDetailCreateBody, JobChangeBody
+from app.schema.http.plan.plan_in import PlanCreateBody, PlanUpdateBody, PlanDetailCreateBody
 from app.utils.utils import ComputerUtils
 
 router = APIRouter(prefix="/plan")

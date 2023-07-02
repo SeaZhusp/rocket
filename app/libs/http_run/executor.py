@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-from app.curd.facade.http.envconfig import EnvConfigFacade
+from app.curd.facade.manage.envconfig import EnvConfigFacade
 from app.utils.dingtalk import DingTalk
 from app.curd.facade.http.report import ReportFacade
 from app.libs.http_run import HttpRunning

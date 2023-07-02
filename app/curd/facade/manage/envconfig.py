@@ -1,7 +1,7 @@
 import json
 from app.base.curd import BaseCurd
 from app.curd.facade.manage.pyshell import PyshellFacade
-from app.models.http.envconfig import EnvConfig
+from app.models.manage.envconfig import EnvConfig
 from app.utils.utils import ModuleUtils
 
 

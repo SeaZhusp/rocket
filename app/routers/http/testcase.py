@@ -6,7 +6,7 @@ from app.core.auth import Auth
 from app.core.response import ListResponseDto, ResponseDto
 from app.curd.http.testcase import TestcaseDao
 from app.curd.facade.http.api import ApiFacade
-from app.curd.facade.http.envconfig import EnvConfigFacade
+from app.curd.facade.manage.envconfig import EnvConfigFacade
 from app.schema.http.testcase.testcase_in import TestcaseCreateBody, TestcaseUpdateBody, TestcaseRunBody
 from app.utils.utils import ComputerUtils
 from app.libs.http_run import HttpRunning
@@ -54,6 +54,6 @@ async def run_testcase(case: TestcaseRunBody, user_info=Depends(Auth())):
         api = await ApiFacade.get_detail_with_id(step.get("id"))
         apis.append(api.to_dict())
     config_map = await EnvConfigFacade.get_and_parse_config(pk=case.env_id)
-    http_run = HttpRunning([{"case_id": case.id, "testcase": apis}], config_map)
+    http_run = HttpRunning([{"case_id": case.id, "case_name": case.name, "testcase": apis}], config_map)
     summary = http_run.run_testcase()
     return ResponseDto(data=summary)

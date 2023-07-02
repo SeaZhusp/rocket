@@ -4,7 +4,7 @@ from app.core.enums import DutyEnum
 from app.core.response import ResponseDto
 from app.core.auth import Auth
 from app.curd.manage.pyshell import PyshellDao
-from app.schema.http.pyshell.pyshell_in import DebugFunctionBody, SavePyshellBody, CreatePyshellBody
+from app.schema.manage.pyshell.pyshell_in import DebugFunctionBody, SavePyshellBody, CreatePyshellBody
 from app.utils.parser import parse_function_from_content, parse_function_meta
 from app.utils.utils import ModuleUtils
 
