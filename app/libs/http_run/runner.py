@@ -1,6 +1,7 @@
 import json
 import time
 
+from app.core.decorator import exception_log
 from app.utils.loader import load_functions
 from app.libs.http_run.report import get_summary
 from httprunner import HttpRunner
@@ -44,6 +45,7 @@ class HttpRunning(object):
         h_testcase = TestCase(config=TConfig(**config), teststeps=test_steps)
         return h_testcase
 
+    @exception_log
     def run_testcase(self):
         start_at = time.strftime("%Y-%m-%d %H:%M:%S")
         start_time = time.time()

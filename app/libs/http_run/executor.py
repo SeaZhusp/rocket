@@ -1,12 +1,14 @@
 import asyncio
 import json
 
+from app.core.decorator import exception_log
 from app.curd.facade.manage.envconfig import EnvConfigFacade
 from app.utils.dingtalk import DingTalk
 from app.curd.facade.http.report import ReportFacade
 from app.libs.http_run import HttpRunning
 
 
+@exception_log
 async def async_execute_plan(testcases, plan, env_name, create_user, **kwargs):
     config_map = await EnvConfigFacade.get_and_parse_config(pk=plan.env_id)
     http_run = HttpRunning(testcases, config_map)
