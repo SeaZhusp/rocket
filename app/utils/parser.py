@@ -19,7 +19,7 @@ def parse_string_value(str_value):
          "$var" => "$var"
     """
     try:
-        return ast.literal_eval(str_value)
+        return ast.literal_eval(str_value)  # 将字符串（如数字、字符串、元组、列表、字典、布尔值和None）转换对应的 Python 对象
     except ValueError:
         return str_value
     except SyntaxError:
@@ -225,3 +225,27 @@ def parse_step(api, config):
                 teardown_hooks=__teardown_hooks,
                 extract=__extract,
                 validate=__validate)
+
+
+def parse_curl(curl_command):
+    """解析curl"""
+    # 提取请求地址
+    url_match = re.search(r"'(.*?)'", curl_command)
+    url = url_match.group(1)
+
+    # 提取请求头
+    headers_match = re.findall(r"-H '(.*?)'", curl_command)
+    headers = {}
+    for header in headers_match:
+        header_parts = header.split(': ')
+        key = header_parts[0]
+        value = header_parts[1]
+        if key not in ['token', 'source', 'content-type']:
+            continue
+        headers[key] = value
+
+    # 提取请求参数
+    data_match = re.search(r"-data-raw '(.*?)'", curl_command)
+    data = data_match.group(1)
+
+    return dict(url=url, headers=headers, data=data)
