@@ -43,6 +43,11 @@ class ApiDao(BaseCurd):
         cls.delete_with_id(pk=pk)
 
     @classmethod
+    async def batch_delete(cls, ids):
+        filter_list = [Api.id.in_(ids)]
+        return cls.delete_with_params(filter_list=filter_list)
+
+    @classmethod
     async def update(cls, api, update_user):
         api.update_user = update_user
         return cls.update_with_id(model=api)

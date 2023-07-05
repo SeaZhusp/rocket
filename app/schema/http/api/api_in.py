@@ -35,3 +35,7 @@ class ApiUpdateBody(ApiCreateBody):
 class SingleApiRunBody(RocketBaseSchema):
     api_id: int
     env_id: int
+
+
+class ApiBatchDeleteBody(RocketBaseSchema):
+    ids: list

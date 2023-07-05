@@ -8,7 +8,7 @@ from app.curd.http.api import ApiDao
 from app.core.auth import Auth
 from app.curd.manage.catalog import CatalogDao
 from app.core.response import ResponseDto, ListResponseDto
-from app.schema.http.api.api_in import ApiCreateBody, ApiUpdateBody, SingleApiRunBody
+from app.schema.http.api.api_in import ApiCreateBody, ApiUpdateBody, SingleApiRunBody, ApiBatchDeleteBody
 from app.libs.http_run import HttpRunning
 
 router = APIRouter(prefix="/api")
@@ -41,6 +41,12 @@ async def get_api_detail(pk: int, user_info=Depends(Auth())):
 @router.delete("/delete/{pk}")
 async def delete_api(pk: int, user_info=Depends(Auth())):
     await ApiDao.delete(pk=pk)
+    return ResponseDto(msg="删除成功")
+
+
+@router.delete("/batch/delete")
+async def batch_delete_api(ids: ApiBatchDeleteBody, user_info=Depends(Auth())):
+    await ApiDao.batch_delete(ids.ids)
     return ResponseDto(msg="删除成功")
 
 
