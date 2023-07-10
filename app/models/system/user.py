@@ -1,7 +1,7 @@
 from sqlalchemy import Column, INT, String
 
 from app.base.model import RocketBaseModel
-from app.core.Enums import StatusEnum, DutyEnum
+from app.core.enums import StatusEnum, DutyEnum
 
 
 class User(RocketBaseModel):

@@ -317,7 +317,7 @@ class HarParser(object):
         return teststep_dict
 
     def _prepare_config(self):
-        """ prepare config block.
+        """ prepare envconfig block.
         """
         return {"name": "testcase description", "variables": {}, "verify": False}
 
@@ -357,7 +357,7 @@ class HarParser(object):
         config = self._prepare_config()
         teststeps = self._prepare_teststeps()
 
-        testcase = {"config": config, "teststeps": teststeps}
+        testcase = {"envconfig": config, "teststeps": teststeps}
         return testcase
 
     def gen_testcase(self, file_type="pytest"):
@@ -378,7 +378,7 @@ class HarParser(object):
             utils.dump_yaml(testcase, output_testcase_file)
         else:
             # default to generate pytest file
-            testcase["config"]["path"] = self.har_file_path
+            testcase["envconfig"]["path"] = self.har_file_path
             output_testcase_file = make_testcase(testcase)
             format_pytest_with_black(output_testcase_file)
 

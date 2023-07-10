@@ -3,7 +3,7 @@ from typing import Union, List
 
 from pydantic import Field, validator
 
-from app.base.schema import RocketBaseSchema, Step, TestcaseBody
+from app.base.schema import RocketBaseSchema, TestcaseBody
 
 
 class TestcaseCreateBody(RocketBaseSchema):
@@ -31,3 +31,7 @@ class TestcaseCreateBody(RocketBaseSchema):
 
 class TestcaseUpdateBody(TestcaseCreateBody):
     id: int = Field(..., title="接口id", description="必传")
+
+
+class TestcaseRunBody(RocketBaseSchema):
+    id: int

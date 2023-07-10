@@ -1,15 +1,21 @@
 import json
 
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Request, Depends
+from fastapi.exceptions import RequestValidationError
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.Auth import request_context
+from app.core.auth import request_context
 from app.routers import router_list
-from app.core.exc.exceptions import BusinessException
-from app.core.Response import ResponseDto
-from app.core.exc.exceptions_handler import business_exception_handler, global_exception_handler
-from config import LOGGING_CONF
+from app.core.exc.exceptions import BusinessException, AuthException, PermissionException
+from app.core.response import ResponseDto
+from app.core.exc.exceptions_handler import business_exception_handler, global_exception_handler, \
+    http_exception_handler, validation_exception_handler, auth_exception_handler, permission_exception_handler
+from app.utils.scheduler import Scheduler
+from config import LOGGING_CONF, Config
 
 rocket = FastAPI()
 
@@ -67,7 +73,11 @@ async def register_middlewares(_app: FastAPI):
 
 async def create_global_exception_handler(_app: FastAPI):
     """创建全局异常处理器"""
-    exception_handler_list = [(BusinessException, business_exception_handler),
+    exception_handler_list = [(StarletteHTTPException, http_exception_handler),
+                              (RequestValidationError, validation_exception_handler),
+                              (AuthException, auth_exception_handler),
+                              (PermissionException, permission_exception_handler),
+                              (BusinessException, business_exception_handler),
                               (Exception, global_exception_handler)
                               ]
     for exception_name, exception_handler in exception_handler_list:
@@ -78,3 +88,18 @@ def init_logging(logging_conf=LOGGING_CONF):
     for log_handler, log_conf in logging_conf.items():
         log_file = log_conf.pop("file", None)
         logger.add(log_file, **log_conf)
+
+
+async def register_scheduler(_app: FastAPI):
+    job_store = {
+        "default": SQLAlchemyJobStore(url=Config.SQLALCHEMY_DATABASE_URI, engine_options={"pool_recycle": 1500},
+                                      pickle_protocol=3),
+    }
+    job_defaults = {
+        "coalesce": True,  # 表示忽略服务器宕机时间段内的任务执行（否则就会出现服务器恢复之后一下子执行多次任务的情况）
+        "misfire_grace_time": 600000  # 容忍错过触发时间的时间间隔,默认1秒
+    }
+    scheduler = AsyncIOScheduler()
+    Scheduler.init(scheduler)
+    Scheduler.configure(jobstores=job_store, job_defaults=job_defaults)
+    Scheduler.start()

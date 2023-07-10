@@ -7,14 +7,11 @@ from app.base.model import RocketBaseModel
 from typing import Type, Union
 
 from app.base.schema import RocketBaseSchema
-from app.core.Enums import DeleteEnum
+from app.core.enums import DeleteEnum
 from app.base.dto import RocketBaseDto
 from app.core.exc.exceptions import BusinessException
-# from app.commons.requests.request_model import BaseBody
-# from app.commons.responses.response_model import BaseDto
 from functools import wraps
 from app.models import Session
-from app.models.system.user import User
 
 
 def connect(func):
@@ -45,19 +42,19 @@ class BaseCurd(object):
     model: Type[RocketBaseModel] = None
 
     @classmethod
-    def __filter_k_v(cls, filter_list: list = None, delete_flg: bool = False, **kwargs):
+    def __filter_k_v(cls, filter_list: list = None, contains_delete: bool = False, **kwargs):
         """
         获取过滤条件
         :param filter_list: 过滤条件，比较特殊的，or_(xxx == xxx)
         :param kwargs: 不定传参，xx = xx
-        :param delete_flg: delete_flg = True时，不过滤删除数据
+        :param contains_delete: contains_delete = True时，不过滤删除数据
         :return: conditions
         """
         filter_list = filter_list if filter_list else list()
         # 判断表是否有del_flag字段
-        if getattr(cls.model, "deleted", None) and not delete_flg:
+        if getattr(cls.model, "deleted", None) and not contains_delete:
             # 只取未删除的数据
-            filter_list.append(getattr(cls.model, "deleted") == DeleteEnum.no.value)
+            filter_list.append(getattr(cls.model, "deleted") == DeleteEnum.NO.value)
         for k, v in kwargs.items():
             # 过滤None的字段值，注意 0 和 False
             if v is None:
@@ -234,9 +231,9 @@ class BaseCurd(object):
         :return:
         """
         # https://docs.sqlalchemy.org/en/14/errors.html#error-bhk3
-        if getattr(cls.model, "update_id") and getattr(cls.model, "update_name") and user:
-            kwargs["update_id"] = user["id"]
-            kwargs["update_name"] = user["username"]
+        # if getattr(cls.model, "update_id") and getattr(cls.model, "update_name") and user:
+        #     kwargs["update_id"] = user["id"]
+        #     kwargs["update_name"] = user["username"]
         query_obj = session.query(cls.model).filter(*filter_list)
         query_obj.update(kwargs)
         session.commit()
@@ -252,6 +249,7 @@ class BaseCurd(object):
         :return:
         """
         session.add(model_obj)
+        session.flush()
         session.commit()
         return model_obj
 
@@ -268,10 +266,30 @@ class BaseCurd(object):
         query_obj = query.first()
         if query_obj is None:
             raise BusinessException("数据不存在")
-        setattr(query_obj, "deleted", DeleteEnum.yes.value)
+        setattr(query_obj, "deleted", DeleteEnum.YES.value)
         session.commit()
         session.refresh(query_obj)
         return query_obj
+
+    @classmethod
+    @connect
+    def delete_with_params(cls, session: Session, filter_list: list = None, **kwargs):
+        """
+        按条件删除
+        :param session:
+        :param filter_list:
+        :param kwargs:
+        :return:
+        """
+        query = cls.query_wrapper(session, filter_list, **kwargs)
+        query_objs = query.all()
+        if query_objs is None:
+            raise BusinessException("数据不存在")
+        for query_obj in query_objs:
+            setattr(query_obj, "deleted", DeleteEnum.YES.value)
+            session.commit()
+            session.refresh(query_obj)
+        return query_objs
 
     @classmethod
     @connect

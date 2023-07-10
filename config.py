@@ -15,14 +15,7 @@ class Config(object):
     TOKEN_KEY = "rocket"
     TOKEN_EXPIRATION = 336
 
-
-HTTP_MSG_MAP = {
-    404: "请求路径找不到",
-    405: "请求方法不支持",
-    408: "请求超时",
-    500: "服务器内部错误",
-    302: "请求方法不支持"
-}
+    EXECUTOR_THREAD_POOL = 2
 
 
 class FilePath(object):

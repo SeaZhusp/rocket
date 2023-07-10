@@ -7,10 +7,17 @@ from pydantic import ValidationError
 from starlette.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.Enums import CodeEnum
+from app.core.enums import CodeEnum
 from app.core.exc.exceptions import BusinessException, PermissionException, AuthException
-from app.core.Response import ResponseDto
-from config import HTTP_MSG_MAP
+from app.core.response import ResponseDto
+
+HTTP_MSG_MAP = {
+    404: "请求路径找不到",
+    405: "请求方法不支持",
+    408: "请求超时",
+    500: "服务器内部错误",
+    302: "请求方法不支持"
+}
 
 
 # 自定义http异常处理器
@@ -20,7 +27,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 
 # 请求参数校验异常处理器
-async def body_validation_exception_handler(request: Request, err: RequestValidationError):
+async def validation_exception_handler(request: Request, err: RequestValidationError):
     message = ""
     data = {}
     for raw_error in err.raw_errors:
@@ -68,8 +75,10 @@ async def global_exception_handler(request: Request, exc: Exception):
         return await permission_exception_handler(request, exc)
     elif isinstance(exc, AuthException):
         return await auth_exception_handler(request, exc)
-    elif isinstance(exc, ValidationError):
-        return await res_validation_exception_handler(request, exc)
+    # elif isinstance(exc, RequestValidationError):
+    #     return await validation_exception_handler(request, exc)
+    # elif isinstance(exc, ValidationError):
+    #     return await res_validation_exception_handler(request, exc)
     else:
         import traceback
         logger.exception(traceback.format_exc())

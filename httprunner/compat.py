@@ -210,7 +210,7 @@ def ensure_testcase_v3_api(api_content: Dict) -> Dict:
         config["export"] = extract_variable_names
 
     return {
-        "config": config,
+        "envconfig": config,
         "teststeps": [teststep],
     }
 
@@ -218,7 +218,7 @@ def ensure_testcase_v3_api(api_content: Dict) -> Dict:
 def ensure_testcase_v3(test_content: Dict) -> Dict:
     logger.info("ensure compatibility with testcase format v2")
 
-    v3_content = {"config": test_content["config"], "teststeps": []}
+    v3_content = {"envconfig": test_content["envconfig"], "teststeps": []}
 
     if "teststeps" not in test_content:
         logger.error(f"Miss teststeps: {test_content}")

@@ -1,4 +1,4 @@
-from app.core.Enums import CodeEnum
+from app.core.enums import CodeEnum
 
 
 class BusinessException(Exception):

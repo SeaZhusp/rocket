@@ -1,11 +1,11 @@
-import ast
 import math
-import re
-
-from app.core.Response import ResponseDto
+import types
+import inspect
 
 
 class StringUtils(object):
+    """字符串工具"""
+
     @staticmethod
     def not_empty(v):
         if isinstance(v, str) and len(v.strip()) == 0:
@@ -17,84 +17,111 @@ class StringUtils(object):
 
 
 class ComputerUtils(object):
+    """计算工具"""
+
     @staticmethod
     def get_total_page(total: int, size: int) -> int:
         return math.ceil(total / size)
 
 
-def get_function_from_content(module_content):
-    function_regex_compile = re.compile(r"def\s([\w]*\(.*?\)):")
-    functions = function_regex_compile.findall(module_content)
-    return [{"value": function} for function in functions]
+class CurdUtils(object):
+    """Curd工具"""
+
+    @staticmethod
+    def recursive_parent_catalog(catalogs, all_catalogs):
+        new_catalogs = []
+        catalog_id_map = {catalog.id: catalog for catalog in all_catalogs}
+
+        def __find_parent(_id):
+            _catalog = catalog_id_map[_id]
+            new_catalogs.append(_catalog)
+            _parent_id = _catalog.parent_id
+            if _parent_id:
+                __find_parent(_parent_id)
+
+        for catalog in catalogs:
+            new_catalogs.append(catalog)
+            parent_id = catalog.parent_id
+            if parent_id:
+                __find_parent(parent_id)
+        return new_catalogs
+
+    @staticmethod
+    def recursive_child_with_catalog_id(catalog_id, all_catalogs):
+        ids = [catalog_id]
+
+        def __find_ids(parent_id):
+            for item in all_catalogs:
+                _parent_id = item.parent_id
+                if parent_id == _parent_id:
+                    _id = item.id
+                    ids.append(_id)
+                    __find_ids(_id)
+
+        __find_ids(catalog_id)
+        return ids
+
+    @staticmethod
+    def parse_2_tree(catalogs):
+        """
+        解析成树结构
+        :param catalogs: 所有目录
+        :return:
+        """
+        tree = list()
+        source = list()
+        tree_dict = dict()
+        for catalog in catalogs:
+            source.append(dict(label=catalog.name,
+                               id=catalog.id,
+                               used=catalog.used,
+                               parent_id=catalog.parent_id,
+                               project_id=catalog.project_id,
+                               children=list()))
+        for item in source:
+            tree_dict[item["id"]] = item
+        for i in tree_dict:
+            if tree_dict[i]["parent_id"]:
+                parent_id = tree_dict[i]["parent_id"]
+                parent = tree_dict[parent_id]
+                parent.setdefault("children", []).append(tree_dict[i])
+            else:
+                tree.append(tree_dict[i])
+        return tree
 
 
-def parse_string_value(str_value):
-    """ parse string to number if possible
-    e.g. "123" => 123
-         "12.2" => 12.3
-         "abc" => "abc"
-         "$var" => "$var"
-    """
-    try:
-        return ast.literal_eval(str_value)
-    except ValueError:
-        return str_value
-    except SyntaxError:
-        # e.g. $var, ${func}
-        return str_value
+class ModuleUtils(object):
+    """模块工具"""
 
+    # @staticmethod
+    # def get_functions_map(code, module_name):
+    #     functions_map = {}
+    #     # 动态创建Python模块
+    #     module = types.ModuleType(module_name)
+    #
+    #     # 将代码添加到模块中
+    #     exec(code, module.__dict__)
+    #
+    #     # 获取模块中的方法
+    #     for name, function in inspect.getmembers(module, inspect.isfunction):
+    #         # 使用反射调用方法
+    #         result = function
+    #         functions_map.update({name: function})
+    #         # print(f"Method '{name}' returned: {result}")
+    #     return functions_map
 
-def parse_function_meta(function_express):
-    """ parse function name and args from string content.
-
-    Args:
-        function_express (str): string content
-
-    Returns:
-        dict: function meta dict
-
-            {
-                "func_name": "xxx",
-                "args": [],
-                "kwargs": {}
-            }
-
-    Examples:
-        >>> parse_function("func()")
-        {"func_name": "func", "args": [], "kwargs": {}}
-
-        >>> parse_function("func(5)")
-        {"func_name": "func", "args": [5], "kwargs": {}}
-
-        >>> parse_function("func(1, 2)")
-        {"func_name": "func", "args": [1, 2], "kwargs": {}}
-
-        >>> parse_function("func(a=1, b=2)")
-        {"func_name": "func", "args": [], "kwargs": {"a": 1, "b": 2}}
-
-        >>> parse_function("func(1, 2, a=3, b=4)")
-        {"func_name": "func", "args": [1, 2], "kwargs": {"a":3, "b":4}}
-
-    """
-    function_regexp_compile = re.compile(r"^([\w_]+)\(([\$\w\.\-/_ =,\"\']*)\)$")
-    matched = function_regexp_compile.match(function_express)
-    function_meta = {
-        "func_name": matched.group(1),
-        "args": [],
-        "kwargs": {}
-    }
-    args_str = matched.group(2).strip()
-    if args_str == "":
-        return function_meta
-
-    args_list = args_str.split(",")
-    for arg in args_list:
-        arg = arg.strip()
-        if "=" in arg:
-            key, value = arg.split("=")
-            function_meta["kwargs"][key.strip()] = parse_string_value(value.strip())
-        else:
-            function_meta["args"].append(parse_string_value(arg))
-
-    print(function_meta)
-    return function_meta
+    @staticmethod
+    def get_functions_map(pyshell_list: list):
+        functions_map = {}
+        for pyshell in pyshell_list:
+            code = pyshell.code
+            module_name = pyshell.module_name
+            # 动态创建Python模块
+            module = types.ModuleType(module_name)
+            # 将代码添加到模块中
+            exec(code, module.__dict__)
+            # 获取模块中的方法
+            for name, function in inspect.getmembers(module, inspect.isfunction):
+                # 使用反射调用方法
+                functions_map.update({name: function})
+        return functions_map

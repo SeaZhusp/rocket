@@ -199,10 +199,12 @@ class ResponseObject(object):
         functions_mapping = functions_mapping or {}
 
         self.validation_results = {}
-        if not validators:
-            return
 
         validate_pass = True
+
+        if not validators:
+            return validate_pass
+
         failures = []
 
         for v in validators:
@@ -233,12 +235,12 @@ class ResponseObject(object):
 
             # expect item
             expect_item = u_validator["expect"]
-            # parse expected value with config/teststep/extracted variables
+            # parse expected value with envconfig/teststep/extracted variables
             expect_value = parse_data(expect_item, variables_mapping, functions_mapping)
 
             # message
             message = u_validator["message"]
-            # parse message with config/teststep/extracted variables
+            # parse message with envconfig/teststep/extracted variables
             message = parse_data(message, variables_mapping, functions_mapping)
 
             validate_msg = f"assert {check_item} {assert_method} {expect_value}({type(expect_value).__name__})"
@@ -280,3 +282,4 @@ class ResponseObject(object):
         if not validate_pass:
             failures_string = "\n".join([failure for failure in failures])
             # raise ValidationFailure(failures_string)
+        return validate_pass

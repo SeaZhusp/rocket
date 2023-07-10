@@ -84,7 +84,7 @@ class TestCase(BaseModel):
 class ProjectMeta(BaseModel):
     debugtalk_py: Text = ""  # debugtalk.py file content
     debugtalk_path: Text = ""  # debugtalk.py file path
-    dot_env_path: Text = ""  # .config file path
+    dot_env_path: Text = ""  # .envconfig file path
     functions: FunctionsMapping = {}  # functions defined in debugtalk.py
     env: Env = {}
     RootDir: Text = os.getcwd()  # project root directory (ensure absolute), the path debugtalk.py located
@@ -145,6 +145,7 @@ class SessionData(BaseModel):
     """request session data, including request, response, validators and stat data"""
 
     success: bool = False
+    test_success: bool = False
     # in most cases, req_resps only contains one request & response
     # while when 30X redirect occurs, req_resps will contain multiple request & response
     req_resps: List[ReqRespData] = []
@@ -157,6 +158,7 @@ class StepData(BaseModel):
     """teststep data, each step maybe corresponding to one request or one testcase"""
 
     success: bool = False
+    test_success: bool = False
     name: Text = ""  # teststep name
     data: Union[SessionData, List['StepData']] = None
     export_vars: VariablesMapping = {}
@@ -168,6 +170,7 @@ StepData.update_forward_refs()
 class TestCaseSummary(BaseModel):
     name: Text
     success: bool
+    test_success: bool = False
     case_id: Text
     time: TestCaseTime
     in_out: TestCaseInOut = {}

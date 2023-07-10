@@ -12,3 +12,4 @@ python-multipart==0.0.5
 sentry-sdk==0.14.4
 pyyaml==6.0
 jmespath==1.0.1
+apscheduler==3.10.1
