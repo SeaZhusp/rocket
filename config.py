@@ -11,6 +11,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # token加密key和过期时间
     TOKEN_KEY = "rocket"
     TOKEN_EXPIRATION = 336
 
