@@ -1,0 +1,4 @@
+INSERT INTO `sys_dict`(`id`, `create_time`, `update_time`, `deleted`, `name`, `code`, `type`, `status`, `description`) VALUES (1, '2023-01-23 11:16:09', '2023-02-18 16:35:13', 0, '验证器', 'http_validator', 1, 1, '验证器');
+INSERT INTO `sys_dict`(`id`, `create_time`, `update_time`, `deleted`, `name`, `code`, `type`, `status`, `description`) VALUES (2, '2023-01-23 11:16:14', '2023-02-18 16:19:19', 0, '请求方法', 'http_method', 0, 1, '请求方法');
+INSERT INTO `sys_dict`(`id`, `create_time`, `update_time`, `deleted`, `name`, `code`, `type`, `status`, `description`) VALUES (3, '2023-02-18 13:45:45', '2023-02-18 16:19:00', 0, '微服务标识', 'http_service', 0, 1, '微服务标识');
+INSERT INTO `sys_dict`(`id`, `create_time`, `update_time`, `deleted`, `name`, `code`, `type`, `status`, `description`) VALUES (4, '2023-02-28 11:36:53', '2023-02-28 11:37:38', 0, '优先级', 'common_level', 0, 1, '优先级');
