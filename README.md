@@ -1,11 +1,16 @@
 # 一、概述
 
 Rocket是一款接口自动化测试平台，服务端是Python，前端Vue。
+
 关键依赖：
 - fastapi
 - httprunner（v3.1.11版本）
 - apscheduler
 - element-ui
+
+前端：https://github.com/SeaZhusp/rocket-web
+
+后端：https://github.com/SeaZhusp/rocket
 
 # 二、功能模块
 核心功能模块基本开发完成，可以直接拿来用，一些细节功能待开发，具体如下：
